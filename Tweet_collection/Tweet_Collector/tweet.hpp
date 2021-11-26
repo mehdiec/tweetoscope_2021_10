@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstddef>
 #include <stdexcept>
-
+#include <boost/heap/binomial_heap.hpp>
 namespace tweetoscope
 {
 
@@ -20,17 +20,47 @@ namespace tweetoscope
     namespace cascade
     {
         using idf = std::size_t;
+        using cascade_ref = std::shared_ptr<Cascade>;
+        using priority_queue = boost::heap::binomial_heap<cascade_ref,
+                                                          boost::heap::compare<cascade_ref_comparator>>;
 
         struct Processor
         {
 
             source::idf source;
             timestamp source_time;
-            Processor(tweet &twt) : source(twt.source), source_time(twt.time){};
+            priority_queue cascade_queue;
+            Processor(tweet &twt) : source(twt.source), source_time(twt.time), cascade_queue(){};
 
             ~Processor(){};
+
+            std::vector<std::string> send_terminated_cascade(timestamp &t_terminated, std::size_t min_cascade_size)
+            {
+
+                return std::vector<std::string>();
+            };
+        };
+        struct cascade_ref_comparator
+        {
+            bool operator()(cascade_ref cascade1, cascade_ref cascade2) const; // Defined later.
         };
 
+        struct Cascade
+        {
+            //(or any other name) for storing cascade information (i.e. the identifier, the message of the first tweet, the collection of retweet magnitudes and time, etc…).
+            //Define a type like using to handle cascade instances.
+
+            std::string cid;
+            std::string msg = "";
+            timestamp time_first_twt;
+            timestamp time_last_twt;
+            double magnitude;
+            source::idf source;
+        };
+        bool cascade_ref_comparator::operator()(cascade_ref cascade1, cascade_ref cascade2) const
+        {
+            return *cascade1 < *cascade2;
+        };
     }
 
     struct tweet

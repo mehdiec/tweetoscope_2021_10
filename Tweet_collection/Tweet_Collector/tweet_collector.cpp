@@ -41,11 +41,11 @@ int main(int argc, char *argv[])
     time.terminated = params.times.terminated;
 
     auto msg = consumer.poll();
-    std::map<tweetoscope::source::idf, Processor> map_idf_processor;
+    std::map<tweetoscope::source::idf, tweetoscope::cascade::Processor> map_idf_processor;
 
-    using cascade_ref = std::shared_ptr<Cascade>;
-    using cascade_wck = std::weak_ptr<Cascade>;
-    std::map<timestamp, std::queue<cascade_wck>> partial_cascade_map;
+    using cascade_ref = std::shared_ptr<tweetoscope::cascade::Cascade>;
+    using cascade_wck = std::weak_ptr<tweetoscope::cascade::Cascade>;
+    std::map<tweetoscope::timestamp, std::queue<cascade_wck>> partial_cascade_map;
     // Assert msg is not empty and there no errors
     if (msg && !msg.get_error())
     {
@@ -58,11 +58,11 @@ int main(int argc, char *argv[])
         //  Creating processor of the source if not already created
         auto key = std::to_string(init_key);
 
-        Processor processor(Twt);
+        tweetoscope::cascade::Processor processor(Twt);
         if (map_idf_processor.find(Twt.source) == map_idf_processor.end())
         {
-            Processor processor(Twt);
-            map_idf_processor[Twt.source] = processor
+            tweetoscope::cascade::Processor processor(Twt);
+            map_idf_processor[Twt.source] = processor;
         }
 
         if (Twt.type == "tweet")
