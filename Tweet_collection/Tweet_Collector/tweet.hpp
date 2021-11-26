@@ -20,6 +20,17 @@ namespace tweetoscope
     namespace cascade
     {
         using idf = std::size_t;
+
+        struct Processor
+        {
+
+            source::idf source;
+            timestamp source_time;
+            Processor(tweet &twt) : source(twt.source), source_time(twt.time){};
+
+            ~Processor(){};
+        };
+
     }
 
     struct tweet
