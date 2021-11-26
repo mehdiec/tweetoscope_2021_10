@@ -1,6 +1,9 @@
 #include "tweetoscopeCollectorParams.hpp"
 #include <cppkafka/cppkafka.h>
 #include "tweet.hpp"
+#include <boost/heap/binomial_heap.hpp>
+#include <map>
+#include <queue>
 int main(int argc, char *argv[])
 {
 
@@ -28,11 +31,9 @@ int main(int argc, char *argv[])
 
     // Create the producer
     cppkafka::Producer producer(prod_config);
-    //auto int_key = MessageBuilder(params.topic.in).partition(0);
-    //auto key = std::to_string(int_key);
-    //MessageBuilder builder = MessageBuilder(params.topic.in).partition(0);
+
     cppkafka::MessageBuilder PartialMessageBuilder{params.topic.out_series};
-    //builder.key(key);
+
     // Implementation of a Producer which write on terminated Cascades : properties
     cppkafka::MessageBuilder TerminatedMessageBuilder{params.topic.out_properties};
     tweetoscope::params::section::Times time;
@@ -40,7 +41,11 @@ int main(int argc, char *argv[])
     time.terminated = params.times.terminated;
 
     auto msg = consumer.poll();
+    std::map<tweetoscope::source::idf, Processor> map_idf_processor;
 
+    using cascade_ref = std::shared_ptr<Cascade>;
+    using cascade_wck = std::weak_ptr<Cascade>;
+    std::map<timestamp, std::queue<cascade_wck>> partial_cascade_map;
     // Assert msg is not empty and there no errors
     if (msg && !msg.get_error())
     {
@@ -52,6 +57,13 @@ int main(int argc, char *argv[])
 
         //  Creating processor of the source if not already created
         auto key = std::to_string(init_key);
+
+        Processor processor(Twt);
+        if (map_idf_processor.find(Twt.source) == map_idf_processor.end())
+        {
+            Processor processor(Twt);
+            map_idf_processor[Twt.source] = processor
+        }
 
         if (Twt.type == "tweet")
         {
