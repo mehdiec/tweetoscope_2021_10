@@ -41,6 +41,23 @@ namespace tweetoscope
 
         using priority_queue = boost::heap::binomial_heap<cascade_ref,
                                                           boost::heap::compare<cascade_ref_comparator>>;
+
+        std::ostream &operator<<(std::ostream &os, std::vector<std::pair<timestamp, double>> &vect)
+        {
+            os << '[';
+            auto it = vect.begin();
+            if (it != vect.end())
+            {
+                os << " [" << (it)->first << ',' << (it++)->second << "] ";
+                while (it != vect.end())
+                    os << ", "
+                       << " [" << (it++)->first << ',' << (it++)->second << "] ";
+            }
+
+            os << "]";
+            return os;
+        };
+
         struct Cascade
         {
             //(or any other name) for storing cascade information (i.e. the identifier, the message of the first tweet, the collection of retweet magnitudes and time, etc…).
@@ -93,25 +110,52 @@ namespace tweetoscope
             }
             std::vector<std::string> send_partial_cascade(std::vector<timestamp> observations)
             {
+
                 std::vector<std::string> data;
                 for (auto observation : observations)
                 {
 
-                    //std::ostringstream ostr;
-                    //
-                    ////cascade_series  { 'type' : 'serie', 'cid': 'tw23981', 'msg' : 'blah blah', 'T_obs': 600, 'tweets': [ (102, 1000), (150,12), ... ] }
-                    //ostr << "{"
-                    //     << "\"type\": "
-                    //     << "size"
-                    //     << "\"cid\":" << ref_cascade->cid
-                    //     << "\"n_tot\":" << ref_cascade->tweets.size()
-                    //     << "\"t_end\":" << ref_cascade->time_last_twwt
-                    //     << '}';
-                    //data.push_back(ostr.str());
-                }
+                    if (!fifo[observation].empty())
+                    {
+                        cascade_wck wck_cascade = fifo[observation].front();
+                        auto ref_cascade = wck_cascade.lock();
 
+                        while (source_time - (ref_cascade->time_first_twt) > observation) //while the duration from the first event until the current timestamp is greater than the observation window
+                        {
+                            // creating the partial cascade
+                            std::vector<std::pair<timestamp, double>> partial_tweets;
+                            for (auto it = ref_cascade->tweets.begin(); (it->first - ref_cascade->time_first_twt <= observation) && (it != ref_cascade->tweets.end()); ++it)
+                            {
+                                partial_tweets.push_back(*it);
+                            }
+
+                            std::ostringstream ostr;
+
+                            //cascade_series  { 'type' : 'serie', 'cid': 'tw23981', 'msg' : 'blah blah', 'T_obs': 600, 'tweets': [ (102, 1000), (150,12), ... ] }
+                            ostr << "{"
+                                 << "\"type\": "
+                                 << "serie"
+                                 << "\"cid\":" << ref_cascade->cid
+                                 << "\"msg\":" << ref_cascade->msg
+                                 << "\"T_obs\":" << observation
+                                 << "\"tweets\":" << partial_tweets
+                                 << '}';
+                            data.push_back(ostr.str());
+                            fifo[observation].pop();
+                            if (!fifo[observation].empty())
+                            {
+                                wck_cascade = fifo[observation].front();
+                                auto ref_cascade = wck_cascade.lock();
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
                 return data;
-            };
+            }
 
             std::vector<std::string> send_terminated_cascade(timestamp &t_terminated, std::size_t min_cascade_size)
             {
