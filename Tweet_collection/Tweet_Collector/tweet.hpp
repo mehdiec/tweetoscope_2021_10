@@ -41,6 +41,12 @@ namespace tweetoscope
 
             std::vector<std::string> send_terminated_cascade(timestamp &t_terminated, std::size_t min_cascade_size)
             {
+                while (!cascade_queue.empty())
+                {
+                    auto ref_cascade = cascade_queue.top();
+                    cascade_queue.pop();
+                    std::cout << *ref_cascade << std::endl;
+                }
 
                 return std::vector<std::string>();
             };
