@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
     auto msg = consumer.poll();
     std::map<tweetoscope::source::idf, tweetoscope::cascade::Processor> map_idf_processor;
-
+    std::map<std::string, tweetoscope::cascade::priority_queue::handle_type> map_key_location;
     using cascade_ref = std::shared_ptr<tweetoscope::cascade::Cascade>;
     using cascade_wck = std::weak_ptr<tweetoscope::cascade::Cascade>;
     std::map<tweetoscope::timestamp, std::queue<cascade_wck>> partial_cascade_map;
@@ -69,12 +69,28 @@ int main(int argc, char *argv[])
         if (twt.type == "tweet")
         {
             processor->source_time = twt.time;
-            tweetoscope::cascade::cascade_ref ref_cascade = tweetoscope::cascade::Cascade::make_cascade_ref(twt, key);
+            cascade_ref ref_cascade = tweetoscope::cascade::Cascade::make_cascade_ref(twt, key);
+            cascade_wck wck_cascade = ref_cascade;
 
             auto location = processor->update_queue(ref_cascade);
+            map_key_location.insert(std::make_pair(key, location));
+
+            for (auto &observation : time.observation)
+            {
+                processor->fifo.insert(std::make_pair(observation, wck_cascade));
+            }
+
+            processor->symbol_table.insert(key, wck_cascade);
         }
         else
         {
+            cascade_wck wck_cascade = processor->symbol_table.at(key);
+            if (auto ref_cascade = wck_cascade.lock(); ref_cascade)
+            {
+                ref_cascade->cascade_update(twt, key);
+                processor->source_time = twt.time;
+                processor->cascade_queue.decrease(map_key_location[key], ref_cascade);
+            }
         }
 
         return 0;

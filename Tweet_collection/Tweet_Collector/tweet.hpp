@@ -21,7 +21,7 @@ namespace tweetoscope
     {
         using idf = std::size_t;
         using cascade_ref = std::shared_ptr<Cascade>;
-        using wck_cascade = std::weak_ptr<Cascade>;
+        using cascade_wck = std::weak_ptr<tweetoscope::cascade::Cascade>;
         using priority_queue = boost::heap::binomial_heap<cascade_ref,
                                                           boost::heap::compare<cascade_ref_comparator>>;
 
@@ -31,7 +31,8 @@ namespace tweetoscope
             source::idf source;
             timestamp source_time;
             priority_queue cascade_queue;
-            std::map<timestamp, std::queue<cascade_ref>> fifo;
+            std::map<timestamp, std::queue<cascade_wck>> fifo;
+            std::map<source::idf, cascade_wck> symbol_table;
             Processor(tweet &twt) : source(twt.source), source_time(twt.time), cascade_queue(){};
 
             ~Processor(){};
@@ -40,6 +41,27 @@ namespace tweetoscope
             {
                 return cascade_queue.push(ref_cascade);
             }
+            std::vector<std::string> send_partial_cascade(std::vector<timestamp> observations)
+            {
+                std::vector<std::string> data;
+                for (auto observation : observations)
+                {
+
+                    //std::ostringstream ostr;
+                    //
+                    ////cascade_series  { 'type' : 'serie', 'cid': 'tw23981', 'msg' : 'blah blah', 'T_obs': 600, 'tweets': [ (102, 1000), (150,12), ... ] }
+                    //ostr << "{"
+                    //     << "\"type\": "
+                    //     << "size"
+                    //     << "\"cid\":" << ref_cascade->cid
+                    //     << "\"n_tot\":" << ref_cascade->tweets.size()
+                    //     << "\"t_end\":" << ref_cascade->time_last_twwt
+                    //     << '}';
+                    //data.push_back(ostr.str());
+                }
+
+                return data;
+            };
 
             std::vector<std::string> send_terminated_cascade(timestamp &t_terminated, std::size_t min_cascade_size)
             {
