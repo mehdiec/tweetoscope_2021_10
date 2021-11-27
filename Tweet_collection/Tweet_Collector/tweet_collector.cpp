@@ -50,23 +50,28 @@ int main(int argc, char *argv[])
     if (msg && !msg.get_error())
     {
         // Instanciation of a tweet
-        tweetoscope::tweet Twt;
+        tweetoscope::tweet twt;
         auto init_key = tweetoscope::cascade::idf(std::stoi(msg.get_key()));
         auto istr = std::istringstream(std::string(msg.get_payload()));
-        istr >> Twt;
+        istr >> twt;
 
         //  Creating processor of the source if not already created
         auto key = std::to_string(init_key);
 
-        tweetoscope::cascade::Processor processor(Twt);
-        if (map_idf_processor.find(Twt.source) == map_idf_processor.end())
+        tweetoscope::cascade::Processor processor_new(twt);
+        if (map_idf_processor.find(twt.source) == map_idf_processor.end())
         {
-            tweetoscope::cascade::Processor processor(Twt);
-            map_idf_processor[Twt.source] = processor;
+            tweetoscope::cascade::Processor processor(twt);
+            map_idf_processor[twt.source] = processor_new;
         }
 
-        if (Twt.type == "tweet")
+        tweetoscope::cascade::Processor *processor = &map_idf_processor.at(twt.source);
+        if (twt.type == "tweet")
         {
+            processor->source_time = twt.time;
+            tweetoscope::cascade::cascade_ref ref_cascade = tweetoscope::cascade::Cascade::make_cascade_ref(twt, key);
+
+            auto location = processor->update_queue(ref_cascade);
         }
         else
         {

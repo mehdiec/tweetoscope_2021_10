@@ -34,6 +34,11 @@ namespace tweetoscope
 
             ~Processor(){};
 
+            auto update_queue(cascade_ref ref_cascade)
+            {
+                return cascade_queue.push(ref_cascade);
+            }
+
             std::vector<std::string> send_terminated_cascade(timestamp &t_terminated, std::size_t min_cascade_size)
             {
 
@@ -56,6 +61,20 @@ namespace tweetoscope
             timestamp time_last_twt;
             double magnitude;
             source::idf source;
+            std::vector<std::pair<timestamp, double>> tweets;
+            Cascade(tweet &twt, std::string &key) : cid(key),
+                                                    msg(twt.msg),
+                                                    time_first_twt(twt.time),
+                                                    time_last_twt(twt.time),
+                                                    tweets({std::make_pair(twt.time, twt.magnitude)}),
+                                                    source(twt.source){};
+            ~Cascade(){};
+            static cascade_ref make_cascade_ref(tweet &twt, std::string &key) { return std::make_shared<Cascade>(twt, key); }
+            void cascade_update(tweet &twt, std::string &key)
+            {
+                tweets.push_back(std::make_pair(twt.time, twt.magnitude));
+                time_last_twt = twt.time;
+            };
         };
         bool cascade_ref_comparator::operator()(cascade_ref cascade1, cascade_ref cascade2) const
         {
