@@ -92,7 +92,33 @@ int main(int argc, char *argv[])
                 processor->cascade_queue.decrease(map_key_location[key], ref_cascade);
             }
         }
+        // series
+        std::vector<std::string> series = processor->send_partial_cascade(time.observation);
+        for (auto &serie : series)
+        {
+            std::cout << "Sending Partial Cascades : " << serie << std::endl;
+            PartialMessageBuilder.payload(serie);
 
-        return 0;
+            producer.produce(PartialMessageBuilder);
+        }
+
+        // properties
+        std::vector<std::string> propertiesToSend = processor->send_terminated_cascade(time.terminated, params.cascade.min_cascade_size);
+        for (auto &msg_properties : propertiesToSend)
+        {
+            std::cout << "Sending Terminated Cascades : " << msg_properties << std::endl;
+            TerminatedMessageBuilder.payload(msg_properties);
+            int i = 0;
+            for (auto T_obs : time.observation)
+            {
+                auto T_obs_key = std::to_string(T_obs);
+                TerminatedMessageBuilder.partition(i);
+                i++;
+                TerminatedMessageBuilder.key(T_obs_key);
+
+                producer.produce(TerminatedMessageBuilder);
+            }
+        }
     }
+    return 0;
 }
