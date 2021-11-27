@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
         tweetoscope::cascade::Processor processor_new(twt);
         if (map_idf_processor.find(twt.source) == map_idf_processor.end())
         {
-            tweetoscope::cascade::Processor processor(twt);
-            map_idf_processor[twt.source] = processor_new;
+
+            map_idf_processor.insert(std::make_pair(twt.source, processor_new));
         }
 
         tweetoscope::cascade::Processor *processor = &map_idf_processor.at(twt.source);
@@ -77,10 +77,10 @@ int main(int argc, char *argv[])
 
             for (auto &observation : time.observation)
             {
-                processor->fifo.insert(std::make_pair(observation, wck_cascade));
+                processor->fifo[observation].push(wck_cascade);
             }
 
-            processor->symbol_table.insert(key, wck_cascade);
+            processor->symbol_table.insert(std::make_pair(key, wck_cascade));
         }
         else
         {
@@ -95,3 +95,4 @@ int main(int argc, char *argv[])
 
         return 0;
     }
+}

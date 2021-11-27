@@ -17,14 +17,62 @@ namespace tweetoscope
     {
         using idf = std::size_t;
     }
+    struct tweet
+    {
+        std::string type = "";
+        std::string msg = "";
+        timestamp time = 0;
+        double magnitude = 0;
+        source::idf source = 0;
+        std::string info = "";
+    };
     namespace cascade
     {
+        struct Cascade;
+
         using idf = std::size_t;
         using cascade_ref = std::shared_ptr<Cascade>;
-        using cascade_wck = std::weak_ptr<tweetoscope::cascade::Cascade>;
+        using cascade_wck = std::weak_ptr<Cascade>;
+
+        struct cascade_ref_comparator
+        {
+            bool operator()(cascade_ref cascade1, cascade_ref cascade2) const; // Defined later.
+        };
+
         using priority_queue = boost::heap::binomial_heap<cascade_ref,
                                                           boost::heap::compare<cascade_ref_comparator>>;
+        struct Cascade
+        {
+            //(or any other name) for storing cascade information (i.e. the identifier, the message of the first tweet, the collection of retweet magnitudes and time, etc…).
+            //Define a type like using to handle cascade instances.
 
+            std::string cid;
+            std::string msg = "";
+            timestamp time_first_twt;
+            timestamp time_last_twt;
+            double magnitude;
+            source::idf source;
+            std::vector<std::pair<timestamp, double>> tweets;
+            Cascade(tweet &twt, std::string &key) : cid(key),
+                                                    msg(twt.msg),
+                                                    time_first_twt(twt.time),
+                                                    time_last_twt(twt.time),
+                                                    tweets({std::make_pair(twt.time, twt.magnitude)}),
+                                                    source(twt.source){};
+            ~Cascade(){};
+            static cascade_ref make_cascade_ref(tweet &twt, std::string &key) { return std::make_shared<Cascade>(twt, key); }
+            void cascade_update(tweet &twt, std::string &key)
+            {
+                tweets.push_back(std::make_pair(twt.time, twt.magnitude));
+                time_last_twt = twt.time;
+            };
+            bool operator<(const Cascade &cascade) const { return time_last_twt < cascade.time_last_twt; }
+        };
+
+        bool cascade_ref_comparator::operator()(cascade_ref cascade1, cascade_ref cascade2) const
+        {
+            return *cascade1 < *cascade2;
+        };
         struct Processor
         {
 
@@ -32,11 +80,13 @@ namespace tweetoscope
             timestamp source_time;
             priority_queue cascade_queue;
             std::map<timestamp, std::queue<cascade_wck>> fifo;
-            std::map<source::idf, cascade_wck> symbol_table;
-            Processor(tweet &twt) : source(twt.source), source_time(twt.time), cascade_queue(){};
+            std::map<std::string, cascade_wck> symbol_table;
+            Processor(const Processor &) = default;
+            Processor &operator=(const Processor &) = default;
 
             ~Processor(){};
 
+            Processor(tweet &twt) : source(twt.source), source_time(twt.time), cascade_queue{}, fifo{}, symbol_table{} {};
             auto update_queue(cascade_ref ref_cascade)
             {
                 return cascade_queue.push(ref_cascade);
@@ -70,7 +120,8 @@ namespace tweetoscope
                 while (!cascade_queue.empty())
                 {
                     auto ref_cascade = cascade_queue.top();
-                    if (source_time - ref_cascade->time_last_twt > t_terminated && ref_cascade->times_magnitudes.size() > min_cascade_size)
+
+                    if ((source_time - ref_cascade->time_last_twt) > t_terminated && ref_cascade->tweets.size() > min_cascade_size)
                     {
                         std::ostringstream ostr;
 
@@ -82,7 +133,7 @@ namespace tweetoscope
                              << "size"
                              << "\"cid\":" << ref_cascade->cid
                              << "\"n_tot\":" << ref_cascade->tweets.size()
-                             << "\"t_end\":" << ref_cascade->time_last_twwt
+                             << "\"t_end\":" << ref_cascade->time_last_twt
                              << '}';
 
                         data.push_back(ostr.str());
@@ -91,52 +142,8 @@ namespace tweetoscope
                 return data;
             };
         };
-        struct cascade_ref_comparator
-        {
-            bool operator()(cascade_ref cascade1, cascade_ref cascade2) const; // Defined later.
-        };
 
-        struct Cascade
-        {
-            //(or any other name) for storing cascade information (i.e. the identifier, the message of the first tweet, the collection of retweet magnitudes and time, etc…).
-            //Define a type like using to handle cascade instances.
-
-            std::string cid;
-            std::string msg = "";
-            timestamp time_first_twt;
-            timestamp time_last_twt;
-            double magnitude;
-            source::idf source;
-            std::vector<std::pair<timestamp, double>> tweets;
-            Cascade(tweet &twt, std::string &key) : cid(key),
-                                                    msg(twt.msg),
-                                                    time_first_twt(twt.time),
-                                                    time_last_twt(twt.time),
-                                                    tweets({std::make_pair(twt.time, twt.magnitude)}),
-                                                    source(twt.source){};
-            ~Cascade(){};
-            static cascade_ref make_cascade_ref(tweet &twt, std::string &key) { return std::make_shared<Cascade>(twt, key); }
-            void cascade_update(tweet &twt, std::string &key)
-            {
-                tweets.push_back(std::make_pair(twt.time, twt.magnitude));
-                time_last_twt = twt.time;
-            };
-        };
-        bool cascade_ref_comparator::operator()(cascade_ref cascade1, cascade_ref cascade2) const
-        {
-            return *cascade1 < *cascade2;
-        };
     }
-
-    struct tweet
-    {
-        std::string type = "";
-        std::string msg = "";
-        timestamp time = 0;
-        double magnitude = 0;
-        source::idf source = 0;
-        std::string info = "";
-    };
 
     inline std::string get_string_val(std::istream &is)
     {
