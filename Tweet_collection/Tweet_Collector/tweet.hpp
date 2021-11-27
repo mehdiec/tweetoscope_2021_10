@@ -21,6 +21,7 @@ namespace tweetoscope
     {
         using idf = std::size_t;
         using cascade_ref = std::shared_ptr<Cascade>;
+        using wck_cascade = std::weak_ptr<Cascade>;
         using priority_queue = boost::heap::binomial_heap<cascade_ref,
                                                           boost::heap::compare<cascade_ref_comparator>>;
 
@@ -30,6 +31,7 @@ namespace tweetoscope
             source::idf source;
             timestamp source_time;
             priority_queue cascade_queue;
+            std::map<timestamp, std::queue<cascade_ref>> fifo;
             Processor(tweet &twt) : source(twt.source), source_time(twt.time), cascade_queue(){};
 
             ~Processor(){};
@@ -51,19 +53,20 @@ namespace tweetoscope
                         std::ostringstream ostr;
 
                         cascade_queue.pop();
-                        //cascade_series
+                        //cascade_properties { 'type' : 'size', 'cid': 'tw23981', 'n_tot': 127, 't_end': 4329 }
 
-                        ostr << "type"
+                        ostr << "{"
+                             << "\"type\": "
                              << "size"
-                             << "cid" << ref_cascade->cid
-                             << "msg" << ref_cascade->msg
-                             << "T_obs" << ref_cascade->time_last_twwt
-                             << "tweets" << ref_cascade->tweets;
+                             << "\"cid\":" << ref_cascade->cid
+                             << "\"n_tot\":" << ref_cascade->tweets.size()
+                             << "\"t_end\":" << ref_cascade->time_last_twwt
+                             << '}';
 
                         data.push_back(ostr.str());
                     }
                 };
-                return std::vector<std::string>();
+                return data;
             };
         };
         struct cascade_ref_comparator
