@@ -1,0 +1,21 @@
+FROM python:3.8-slim
+
+RUN pip install --upgrade pip
+RUN pip3 install numpy \
+scipy \
+matplotlib \
+pandas \
+seaborn \
+kafka-python \
+termcolor
+
+
+ADD ./estimator.py .
+ADD ./Hawks_processes .
+# ADD ./Hawks_processes/Models/estimation.py .
+# ADD ./Hawks_processes/Models/estimation.py .
+# ADD ./Hawks_processes/utils.py .
+# ADD ./Hawks_processes/Models/predict.py .
+
+CMD python3 estimator.py --broker-list kafka-service:9092
+
