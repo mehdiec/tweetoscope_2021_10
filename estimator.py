@@ -47,13 +47,12 @@ for msg in consumer:
     value = {
         "type": "parameters",
         "cid": cid,
-        "msg": msg,
+        "msg": 0,
         "n_obs": n_obs,
         "n_supp": N_tot,
         "params": tuple(params),
         "n_star": estimator.n_star,
         "G1": estimator.G1,
     }
-
     producer.send("cascade_properties", key=key, value=value)
 producer.flush()

@@ -11,8 +11,8 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("--broker-list", type=str, required=True, help="the broker list")
 args = parser.parse_args()  # Parse arguments
 
-consumer_series = KafkaConsumer(
-    "cascade_series",  # Topic name
+consumer_properties = KafkaConsumer(
+    "cascade_properties",  # Topic name
     bootstrap_servers=args.broker_list,  # List of brokers passed from the command line
     value_deserializer=lambda v: json.loads(
         v.decode("utf-8")
@@ -42,57 +42,75 @@ producer = KafkaProducer(
 cid_n_tot_dict = {}  # dictionnary with cid as keys and n_tot as values
 cid_params_dict = {}  # dictionary with cid as keys and params as value
 
-for msg in consumer_series:
+for msg in consumer_properties:
     alpha, mu = 2.4, 10
+    msg_value = msg.value
 
-    if msg["type"] == "parameters":
+    w_true = None
+
+    if msg_value["type"] == "parameters":
         # { 'type': 'parameters', 'cid': 'tw23981', 'msg' : 'blah blah', 'n_obs': 32, 'n_supp' : 120, 'params': [ 0.0423, 124.312 ], n_star G1 }
         # Getting data from msg
-        n_supp = msg["n_supp"]
-        params = msg["params"]
-        n_obs = msg["n_obs"]
-        cid = msg["cid"]
+        n_supp = msg_value["n_supp"]
+        params = msg_value["params"]
+        n_obs = msg_value["n_obs"]
+        cid = msg_value["cid"]
         if cid not in cid_n_tot_dict.keys():
-            cid_params_dict[cid] = msg
+            cid_params_dict[cid] = msg_value
         else:
             n_tot = cid_n_tot_dict[cid]
+            estimator = HawksProcess(
+                alpha=alpha, mu=mu, n_star=n_star, params=params, G1=G1
+            )
+            n = estimator.prediction_one_shot(n_obs)
+            try:
+                w_true = (n_tot - n) * (1 - n_star) / G1
+            except ZeroDivisionError:
+                w_true = -1
 
-        n_star = msg["n_star"]
-        G1 = msg["G1"]
+        n_star = msg_value["n_star"]
+        G1 = msg_value["G1"]
 
-        T_obs = msg["T_obs"]
+        T_obs = msg.key
 
-    elif msg["type"] == "size":
+    elif msg_value["type"] == "size":
+
         # { 'type' : 'size', 'cid': 'tw23981', 'n_tot': 127, 't_end': 4329 }
-        cid = msg["cid"]
-        n_tot = msg["n_tot"]
-        t_end = msg["t_end"]
-        if cid not in cid_n_tot_dict.keys():
+        cid = msg_value["cid"]
+        n_tot = msg_value["n_tot"]
+
+        t_end = msg_value["t_end"]
+        T_obs = msg.key
+        if cid not in cid_params_dict.keys():
             cid_n_tot_dict[cid] = n_tot
 
         else:
+
             msg_params = cid_params_dict[cid]
             n_star = msg_params["n_star"]
             G1 = msg_params["G1"]
-
-            T_obs = msg_params["T_obs"]
             params = msg_params["params"]
+            estimator = HawksProcess(
+                alpha=alpha, mu=mu, n_star=n_star, params=params, G1=G1
+            )
+            n = estimator.prediction_one_shot(n_obs)
+            try:
+                w_true = (n_tot - n) * (1 - n_star) / G1
+            except ZeroDivisionError:
+                w_true = -1
+    else:
+        print("N tot fir T_obs is : " + str(T_obs) + " And cid is :" + str(cid))
+        continue
 
-    estimator = HawksProcess(alpha=alpha, mu=mu, n_star=n_star, params=params, G1=G1)
-    n = estimator.prediction_one_shot(n_obs)
-    try:
-        w_true = (n_tot - n) * (1 - n_star) / G1
-    except ZeroDivisionError:
-        w_true = -1
+    if w_true:
+        key = T_obs
+        value_sample = {
+            "type": "sample",
+            "cid": "tw23981",
+            "X": [params[1], G1, n_star],
+            "W": w_true,
+        }
 
-    key = T_obs
-    value_sample = {
-        "type": "sample",
-        "cid": "tw23981",
-        "X": [params[1], G1, n_star],
-        "W": w_true,
-    }
-
-    producer.send("cascade_samples", key=T_obs, value=value_sample)
+        producer.send("cascade_samples", key=T_obs, value=value_sample)
 
 producer.flush()
