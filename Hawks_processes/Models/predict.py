@@ -19,15 +19,20 @@ class HawksProcess:
         mu,
         n_star=None,
         G1=None,
+        params=None,
         submodel_params=None,
         estimator=None,
     ):
         if submodel_params is None:
             submodel_params = {
-                "params": (0.01, 1 / 3600.0),
                 "init_params": np.array([0.0001, 1.0 / 60]),
                 "prior_params": [0.02, 0.0002, 0.01, 0.001, -0.1],
             }
+
+        if params is None:
+            params = (0.01, 1 / 3600.0)
+        self.params = params
+
         self.submodel_params = dict(submodel_params)
 
         self.n_star = n_star
@@ -96,7 +101,7 @@ class HawksProcess:
         T        -- 1D-array of times (i.e ends of observation window)
         """
 
-        p, beta = self.submodel_params["params"]
+        p, beta = self.params
 
         tis = history[:, 0]
         if T is None:
@@ -161,12 +166,12 @@ class HawksProcess:
         for i, t in enumerate(T):
 
             partial_history = history[tis < t]
-            best_LL, self.submodel_params["params"], best_N_tot = -np.inf, None, np.inf
+            best_LL, self.params, best_N_tot = -np.inf, None, np.inf
 
             estim = self.estimator(
                 alpha=self.alpha,
                 mu=self.mu,
-                submodel_params=self.submodel_params["params"],
+                submodel_params=self.params,
             )
             for _ in range(n_tries):
 
@@ -177,9 +182,9 @@ class HawksProcess:
 
                 if LL > best_LL:
                     N_tot = self.prediction(partial_history, t, param)
-                    estim.submodel_params["params"] = param
+                    estim.params = param
 
-                    self.submodel_params["params"] = param
+                    self.params = param
 
                     best_LL, best_N_tot = (
                         LL,
@@ -189,6 +194,6 @@ class HawksProcess:
             N[i, 1], LLs[i, 1], params[i, 1:] = (
                 best_N_tot,
                 best_LL,
-                estim.submodel_params["params"],
+                estim.params,
             )
         return N, LLs, params

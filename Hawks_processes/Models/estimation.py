@@ -74,6 +74,7 @@ class MAP(HawksProcess):
             options={"xtol": 1e-8, "disp": display},
         )
         # Returns the loglikelihood and found parameters
+        self.params = res.x
 
         return (-res.fun, res.x)
 
@@ -85,7 +86,7 @@ class MLE(HawksProcess):
         HawksProcess ([type]): [description]
     """
 
-    def __init__(self, alpha=None, mu=None, submodel_params=None):
+    def __init__(self, alpha=None, mu=None, params=None, submodel_params=None):
         super(MLE, self).__init__(alpha=alpha, mu=mu, submodel_params=submodel_params)
 
         # super(HawksProcess, self).__init__(alpha=alpha, mu=mu)
@@ -121,6 +122,7 @@ class MLE(HawksProcess):
             bounds=bounds,
             options={"xtol": 1e-8, "disp": display},
         )
+        self.params = res.x
 
         # Returns the loglikelihood and found parameters
         return (-res.fun, tuple(res.x))
