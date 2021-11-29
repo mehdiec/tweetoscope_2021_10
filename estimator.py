@@ -12,25 +12,22 @@ args = parser.parse_args()  # Parse arguments
 
 consumer = KafkaConsumer(
     "cascade_series",  # Topic name
+    # Topic name
     bootstrap_servers=args.broker_list,  # List of brokers passed from the command line
-    value_deserializer=lambda v: json.loads(
-        v.decode("utf-8")
-    ),  # How to deserialize the value from a binary buffer
-    key_deserializer=lambda v: v.decode(),  # How to deserialize the key (if any)
+    value_deserializer=lambda v: json.loads(v.decode("utf-8")),
 )
 
 producer = KafkaProducer(
     bootstrap_servers=args.broker_list,  # List of brokers passed from the command line
-    value_serializer=lambda v: json.dumps(v).encode(
-        "utf-8"
-    ),  # How to serialize the value to a binary buffer
-    key_serializer=str.encode,  # How to serialize the key
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    key_serializer=lambda v: json.dumps(v).encode("utf-8"),
 )
 
 
 for msg in consumer:
     alpha, mu = 2.4, 10
     estimator = MAP(alpha, mu)
+
     msg = msg.value
 
     # Getting data from msg
@@ -42,7 +39,7 @@ for msg in consumer:
     message = msg["msg"]
 
     estimator.train(history, T_obs)
-    params = (estimator.alpha, estimator.beta)
+    params = estimator.params
     N_tot = estimator.prediction(history, T_obs, params)
 
     key = T_obs
@@ -53,9 +50,10 @@ for msg in consumer:
         "msg": msg,
         "n_obs": n_obs,
         "n_supp": N_tot,
-        "params": params,
+        "params": tuple(params),
         "n_star": estimator.n_star,
         "G1": estimator.G1,
     }
-    producer.send("cascade_series", key=key, value=value)
+
+    producer.send("cascade_properties", key=key, value=value)
 producer.flush()
