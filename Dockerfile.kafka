@@ -34,3 +34,4 @@ RUN wget https://pennerath.pages.centralesupelec.fr/tweetoscope/data/server.prop
 
 CMD export KAFKA_PATH=./kafka-2.4.1-src
 CMD ./kafka.sh start --zooconfig zookeeper.properties --serverconfig server.properties 
+haha
