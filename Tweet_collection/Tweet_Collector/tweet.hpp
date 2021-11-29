@@ -155,7 +155,7 @@ namespace tweetoscope
                 std::ostringstream ostr;
                 ostr << "{"
                      << "\"type\": "
-                     << "size, "
+                     << "\"size\", "
                      << "\"cid\":" << cid
                      << ", \"n_tot\":" << tweets.size()
                      << ", \"t_end\":" << (time_last_twt)
@@ -176,9 +176,10 @@ namespace tweetoscope
                 }
                 ostr << "{"
                      << "\"type\": "
-                     << "serie, "
+                     << "\"serie\", "
                      << "\"cid\":" << cid
-                     << ", \"msg\":" << msg
+                     << ", \"msg\":  \"msg\""
+
                      << ", \"T_obs\":" << observation
                      << ", \"tweets\":" << partial_tweets
                      << '}';
