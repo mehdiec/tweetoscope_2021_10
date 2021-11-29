@@ -58,15 +58,8 @@ class HawksProcess:
 
         tis = history[:, 0]
         EM = self.mu * (self.alpha - 1) / (self.alpha - 2)
-        print(" MAP ou MLE:     ")
-        print("params  MAP si c'est none je chiale")
-        print("params              self.params")
-        print(params, self.submodel_params["params"])
-        print("p * EM")
-        print(p, EM)
 
         n_star = p * EM
-        print(n_star)
 
         if n_star >= 2:
             raise Exception(f"Branching factor {n_star:.2f} greater than one")
@@ -172,20 +165,10 @@ class HawksProcess:
                 LL, param = estim.train(partial_history, t, max_n_star=2)
 
                 if LL > best_LL:
-                    print("ON RENTRE  on est dans fit predict")
-
                     N_tot = self.prediction(partial_history, t, param)
                     estim.submodel_params["params"] = param
 
                     self.submodel_params["params"] = param
-                    print(
-                        "None?    ",
-                        self.submodel_params["params"],
-                        "       ",
-                        estim.submodel_params["params"],
-                        "Ne< w ",
-                        param,
-                    )
 
                     best_LL, best_N_tot = (
                         LL,

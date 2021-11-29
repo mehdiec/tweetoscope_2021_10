@@ -74,7 +74,6 @@ class MAP(HawksProcess):
             options={"xtol": 1e-8, "disp": display},
         )
         # Returns the loglikelihood and found parameters
-        print(res)
 
         return (-res.fun, res.x)
 
@@ -122,7 +121,6 @@ class MLE(HawksProcess):
             bounds=bounds,
             options={"xtol": 1e-8, "disp": display},
         )
-        print(res)
 
         # Returns the loglikelihood and found parameters
         return (-res.fun, tuple(res.x))
