@@ -17,22 +17,32 @@ class HawksProcess:
         self,
         alpha,
         mu,
+        n_star=None,
+        G1=None,
+        params=None,
         submodel_params=None,
         estimator=None,
     ):
         if submodel_params is None:
             submodel_params = {
-                "params": (0.01, 1 / 3600.0),
                 "init_params": np.array([0.0001, 1.0 / 60]),
                 "prior_params": [0.02, 0.0002, 0.01, 0.001, -0.1],
             }
+
+        if params is None:
+            params = (0.01, 1 / 3600.0)
+        self.params = params
+
         self.submodel_params = dict(submodel_params)
 
+        self.n_star = n_star
+        self.G1 = G1
         self.alpha = alpha
         self.mu = mu
         if not estimator:
             estimator = None
         self.estimator = get_model_class(estimator)
+        self.to_send = np.array([])
 
     def train(
         self,
@@ -43,7 +53,7 @@ class HawksProcess:
     ):
         raise NotImplementedError
 
-    def prediction(self, history, t, params):
+    def prediction(self, history, t, model=None):
         """
         Returns the expected total numbers of points for a set of time points
 
@@ -52,25 +62,32 @@ class HawksProcess:
         alpha    -- power parameter of the power-law mark distribution
         mu       -- min value parameter of the power-law mark distribution
         t        -- current time (i.e end of observation window)
+        model    -- random forest model
         """
 
-        p, beta = params
+        p, beta = self.params
 
         tis = history[:, 0]
         EM = self.mu * (self.alpha - 1) / (self.alpha - 2)
 
-        n_star = p * EM
+        self.n_star = p * EM
 
-        if n_star >= 2:
-            raise Exception(f"Branching factor {n_star:.2f} greater than one")
+        if self.n_star >= 2:
+            raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
         n = len(history)
         I = history[:, 0] < t
         tis = history[I, 0]
         mis = history[I, 1]
-        G1 = p * np.sum(mis * np.exp(-beta * (t - tis)))
+        self.G1 = p * np.sum(mis * np.exp(-beta * (t - tis)))
+        if model:
+            omega = model(beta, self.n_star)
 
-        Ntot = n + G1 / (1.0 - n_star)
+            Ntot = n + omega * self.G1 / (1.0 - self.n_star)
+
+        else:
+
+            Ntot = n + self.G1 / (1.0 - self.n_star)
 
         return Ntot
 
@@ -85,7 +102,7 @@ class HawksProcess:
         T        -- 1D-array of times (i.e ends of observation window)
         """
 
-        p, beta = self.submodel_params["params"]
+        p, beta = self.params
 
         tis = history[:, 0]
         if T is None:
@@ -95,11 +112,11 @@ class HawksProcess:
         N[:, 0] = T
 
         EM = self.mu * (self.alpha - 1) / (self.alpha - 2)
-        n_star = p * EM
+        self.n_star = p * EM
 
-        if n_star >= 1:
+        if self.n_star >= 1:
 
-            raise Exception(f"Branching factor {n_star:.2f} greater than one")
+            raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
         Si, ti_prev, i = 0.0, 0.0, 0
 
@@ -113,8 +130,8 @@ class HawksProcess:
                 i += 1
 
             n = i + 1
-            G1 = p * Si * np.exp(-beta * (t - ti_prev))
-            N[j, 1] = n + G1 / (1.0 - n_star)
+            self.G1 = p * Si * np.exp(-beta * (t - ti_prev))
+            N[j, 1] = n + self.G1 / (1.0 - self.n_star)
 
         return N
 
@@ -150,12 +167,12 @@ class HawksProcess:
         for i, t in enumerate(T):
 
             partial_history = history[tis < t]
-            best_LL, self.submodel_params["params"], best_N_tot = -np.inf, None, np.inf
+            best_LL, self.params, best_N_tot = -np.inf, None, np.inf
 
             estim = self.estimator(
                 alpha=self.alpha,
                 mu=self.mu,
-                submodel_params=self.submodel_params["params"],
+                submodel_params=self.params,
             )
             for _ in range(n_tries):
 
@@ -166,9 +183,9 @@ class HawksProcess:
 
                 if LL > best_LL:
                     N_tot = self.prediction(partial_history, t, param)
-                    estim.submodel_params["params"] = param
+                    estim.params = param
 
-                    self.submodel_params["params"] = param
+                    self.params = param
 
                     best_LL, best_N_tot = (
                         LL,
@@ -178,6 +195,6 @@ class HawksProcess:
             N[i, 1], LLs[i, 1], params[i, 1:] = (
                 best_N_tot,
                 best_LL,
-                estim.submodel_params["params"],
+                estim.params,
             )
         return N, LLs, params

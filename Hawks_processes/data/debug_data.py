@@ -51,7 +51,7 @@ class SimulateProcess:
         # Every row thus describes a marked timepoint (ti, mi) with a magnitude set arbitrarily to one.
 
         # Create an unitialized array for optimization purpose (only memory allocation)
-        T = np.empty((max_size, 2))
+        T = np.empty((max_size, 2), dtype=float)
 
         # Set magnitudes to m0.
 
