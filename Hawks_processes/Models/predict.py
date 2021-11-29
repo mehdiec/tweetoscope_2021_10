@@ -17,6 +17,8 @@ class HawksProcess:
         self,
         alpha,
         mu,
+        n_star=None,
+        G1=None,
         submodel_params=None,
         estimator=None,
     ):
@@ -28,6 +30,8 @@ class HawksProcess:
             }
         self.submodel_params = dict(submodel_params)
 
+        self.n_star = n_star
+        self.G1 = G1
         self.alpha = alpha
         self.mu = mu
         if not estimator:
@@ -43,7 +47,7 @@ class HawksProcess:
     ):
         raise NotImplementedError
 
-    def prediction(self, history, t, params):
+    def prediction(self, history, t, params, model):
         """
         Returns the expected total numbers of points for a set of time points
 
@@ -52,6 +56,7 @@ class HawksProcess:
         alpha    -- power parameter of the power-law mark distribution
         mu       -- min value parameter of the power-law mark distribution
         t        -- current time (i.e end of observation window)
+        model    -- random forest model
         """
 
         p, beta = params
@@ -59,18 +64,24 @@ class HawksProcess:
         tis = history[:, 0]
         EM = self.mu * (self.alpha - 1) / (self.alpha - 2)
 
-        n_star = p * EM
+        self.n_star = p * EM
 
-        if n_star >= 2:
-            raise Exception(f"Branching factor {n_star:.2f} greater than one")
+        if self.n_star >= 2:
+            raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
         n = len(history)
         I = history[:, 0] < t
         tis = history[I, 0]
         mis = history[I, 1]
-        G1 = p * np.sum(mis * np.exp(-beta * (t - tis)))
+        self.G1 = p * np.sum(mis * np.exp(-beta * (t - tis)))
+        if model:
+            omega = model(beta, self.n_star)
 
-        Ntot = n + G1 / (1.0 - n_star)
+            Ntot = n + omega * self.G1 / (1.0 - self.n_star)
+
+        else:
+
+            Ntot = n + self.G1 / (1.0 - self.n_star)
 
         return Ntot
 
@@ -95,11 +106,11 @@ class HawksProcess:
         N[:, 0] = T
 
         EM = self.mu * (self.alpha - 1) / (self.alpha - 2)
-        n_star = p * EM
+        self.n_star = p * EM
 
-        if n_star >= 1:
+        if self.n_star >= 1:
 
-            raise Exception(f"Branching factor {n_star:.2f} greater than one")
+            raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
         Si, ti_prev, i = 0.0, 0.0, 0
 
@@ -113,8 +124,8 @@ class HawksProcess:
                 i += 1
 
             n = i + 1
-            G1 = p * Si * np.exp(-beta * (t - ti_prev))
-            N[j, 1] = n + G1 / (1.0 - n_star)
+            self.G1 = p * Si * np.exp(-beta * (t - ti_prev))
+            N[j, 1] = n + self.G1 / (1.0 - self.n_star)
 
         return N
 
