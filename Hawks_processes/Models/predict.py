@@ -135,66 +135,27 @@ class HawksProcess:
 
         return N
 
-    def fit_predict(self, history, T=None, n_tries=10):
-
+    def prediction_one_shot(self, n, model=None):
         """
-        Compute the provided estimator for different observation windows and apply prediction according to it. Returns
-        * the expected total numbers of points for a set of time points as a 1D-array
-        * the computed loglikelihoods as a 1D-array
-        * the estimated parameters as a 2D-array
+        Returns the expected total numbers of points for a set of time points
 
-        estimator -- function that implements an estimator that expect the same arguments as compute_MLE
-        history   -- (n,2) numpy array containing marked time points (t_i,m_i)
-        alpha     -- power parameter of the power-law mark distribution
-        mu        -- min value parameter of the power-law mark distribution
-        T         -- 1D-array of times (i.e ends of observation window)
-        n_tries   -- number of times the estimator is run. Best result is kept.
+        params   -- parameter tuple (p,beta) of the Hawkes process
+        n        -- observation size
+        model    -- random forest model
         """
 
-        tis = history[:, 0]
-        if T is None:
-            T = np.linspace(
-                60, tis[-1], 50
-            )  # Compute 50 points from 1min to last time point
+        p, beta = self.params
 
-        N = np.zeros((len(T), 2))
-        N[:, 0] = T
-        LLs = np.zeros((len(T), 2))
-        LLs[:, 0] = T
-        params = np.zeros((len(T), 3))
-        params[:, 0] = T
+        if self.n_star >= 2:
+            raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
-        for i, t in enumerate(T):
+        if model:
+            omega = model(beta, self.n_star, self.G1)
 
-            partial_history = history[tis < t]
-            best_LL, self.params, best_N_tot = -np.inf, None, np.inf
+            Ntot = n + omega * self.G1 / (1.0 - self.n_star)
 
-            estim = self.estimator(
-                alpha=self.alpha,
-                mu=self.mu,
-                submodel_params=self.params,
-            )
-            for _ in range(n_tries):
+        else:
 
-                if self.estimator is None:
-                    return None
+            Ntot = n + self.G1 / (1.0 - self.n_star)
 
-                LL, param = estim.train(partial_history, t, max_n_star=2)
-
-                if LL > best_LL:
-                    N_tot = self.prediction(partial_history, t, param)
-                    estim.params = param
-
-                    self.params = param
-
-                    best_LL, best_N_tot = (
-                        LL,
-                        N_tot,
-                    )
-
-            N[i, 1], LLs[i, 1], params[i, 1:] = (
-                best_N_tot,
-                best_LL,
-                estim.params,
-            )
-        return N, LLs, params
+        return Ntot
