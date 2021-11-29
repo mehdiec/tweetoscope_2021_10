@@ -1,0 +1,52 @@
+FROM ubuntu
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt install -y build-essential pkg-config
+RUN apt-get install -y cmake 
+RUN apt-get install -y libboost-all-dev 
+RUN apt-get install -y g++
+RUN apt-get install -y gcc
+RUN apt-get install -y librdkafka-dev
+RUN apt-get install -y git 
+RUN apt-get install libpthread-stubs0-dev
+RUN apt-get install libssl-dev -y
+
+#RUN git clone https://github.com/mfontanini/cppkafka.git
+# CMD mkdir build
+# CMD cd build
+# CMD cmake 
+# CMD make
+# CMD make install
+# CMD cd ../..
+
+# RUN ldconfig
+RUN git clone https://github.com/mfontanini/cppkafka
+RUN cd cppkafka;mkdir build;cd build;cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64;make -j;make install;cd ../..
+
+
+RUN git clone https://github.com/HerveFrezza-Buet/gaml
+# CMD cd gaml
+# CMD mkdir -p ./build
+# CMD cd build
+# CMD cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+# CMD make -j
+# CMD make install
+# CMD cd ../..
+
+RUN cd gaml; mkdir -p gaml/build;cd gaml/build;cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64;make -j;make install;cd ../../..
+ENV PKG_CONFIG_PATH=/gaml/gaml/build
+
+COPY ./news-index.csv ./news-index.csv
+COPY ./news-data.csv ./news-data.csv 
+COPY ./params.config ./params.config
+COPY ./tweetoscopeGenerator.hpp ./tweetoscopeGenerator.hpp
+COPY ./tweet-generator.cpp ./tweet-generator.cpp
+
+#CMD bash
+RUN g++ -o tweet-generator -O3 -Wall -std=c++17 tweet-generator.cpp `pkg-config --libs --cflags gaml cppkafka` -lpthread
+CMD ./tweet-generator params.config
+
+
+
+
+
+
