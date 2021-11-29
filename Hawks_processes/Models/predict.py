@@ -42,6 +42,7 @@ class HawksProcess:
         if not estimator:
             estimator = None
         self.estimator = get_model_class(estimator)
+        self.to_send = np.array([])
 
     def train(
         self,
@@ -52,7 +53,7 @@ class HawksProcess:
     ):
         raise NotImplementedError
 
-    def prediction(self, history, t, params, model):
+    def prediction(self, history, t, model=None):
         """
         Returns the expected total numbers of points for a set of time points
 
@@ -64,7 +65,7 @@ class HawksProcess:
         model    -- random forest model
         """
 
-        p, beta = params
+        p, beta = self.params
 
         tis = history[:, 0]
         EM = self.mu * (self.alpha - 1) / (self.alpha - 2)

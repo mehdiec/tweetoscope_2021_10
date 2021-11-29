@@ -17,8 +17,16 @@ class MAP(HawksProcess):
         alpha=None,
         mu=None,
         submodel_params=None,
+        n_star=None,
+        G1=None,
     ):
-        super(MAP, self).__init__(alpha=alpha, mu=mu, submodel_params=submodel_params)
+        super(MAP, self).__init__(
+            alpha=alpha,
+            mu=mu,
+            submodel_params=submodel_params,
+            n_star=G1,
+            G1=G1,
+        )
 
     def train(
         self,
@@ -86,8 +94,22 @@ class MLE(HawksProcess):
         HawksProcess ([type]): [description]
     """
 
-    def __init__(self, alpha=None, mu=None, params=None, submodel_params=None):
-        super(MLE, self).__init__(alpha=alpha, mu=mu, submodel_params=submodel_params)
+    def __init__(
+        self,
+        alpha=None,
+        mu=None,
+        params=None,
+        submodel_params=None,
+        n_star=None,
+        G1=None,
+    ):
+        super(MLE, self).__init__(
+            alpha=alpha,
+            mu=mu,
+            submodel_params=submodel_params,
+            n_star=n_star,
+            G1=G1,
+        )
 
         # super(HawksProcess, self).__init__(alpha=alpha, mu=mu)
 
