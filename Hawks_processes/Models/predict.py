@@ -80,14 +80,8 @@ class HawksProcess:
         tis = history[I, 0]
         mis = history[I, 1]
         self.G1 = p * np.sum(mis * np.exp(-beta * (t - tis)))
-        if model:
-            omega = model(beta, self.n_star)
 
-            Ntot = n + omega * self.G1 / (1.0 - self.n_star)
-
-        else:
-
-            Ntot = n + self.G1 / (1.0 - self.n_star)
+        Ntot = n + self.G1 / (1.0 - self.n_star)
 
         return Ntot
 
@@ -149,7 +143,7 @@ class HawksProcess:
         if self.n_star >= 2:
             raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
-        if model:
+        if model is not None:
             omega = model(beta, self.n_star, self.G1)
 
             Ntot = n + omega * self.G1 / (1.0 - self.n_star)
