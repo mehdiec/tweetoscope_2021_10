@@ -1,0 +1,6 @@
+FROM wurstmeister/kafka:2.13-2.7.0
+ARG broker_id
+ENV broker_id $broker_id
+ARG listener_port
+ENV listener_port $listener_port
+CMD kafka-server-start.sh /opt/kafka_2.13-2.7.0/config/server.properties --override broker.id=$broker_id --override listeners=PLAINTEXT://:$listener_port
