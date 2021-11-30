@@ -10,12 +10,13 @@ kafka-python \
 termcolor
 
 
-ADD ./estimator.py .
-ADD ./Hawks_processes .
+ADD ./tweetoscope/estimator.py .
+ADD ./tweetoscope/Hawks_processes Hawks_processes
+
 # ADD ./Hawks_processes/Models/estimation.py .
 # ADD ./Hawks_processes/Models/estimation.py .
 # ADD ./Hawks_processes/utils.py .
 # ADD ./Hawks_processes/Models/predict.py .
 
-CMD python3 estimator.py --broker-list kafka-service:9092
+CMD python3 estimator.py --broker-list localhost:9092
 
