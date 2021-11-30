@@ -111,10 +111,13 @@ int main(int argc, char *argv[])
 
                     ref_cascade->cascade_update(twt, key);
                     processor->update_newest_source_time(twt);
-
                     if (map_key_location[key].node_ != 0)
                     {
                         processor->decrease_priority(map_key_location[key], ref_cascade);
+                    }
+                    else
+                    {
+                        processor->symbol_table.erase(key);
                     }
                 }
                 else
@@ -122,10 +125,10 @@ int main(int argc, char *argv[])
                     map_key_location.erase(key);
                     processor->symbol_table.erase(key); // if expired, remove from symbol_table
                 }
-                if (wck_cascade.use_count() > 1)
-                {
-                    throw std::invalid_argument("too many shared pointers ");
-                }
+                //if (wck_cascade.use_count() > 1)
+                //{
+                //    throw std::invalid_argument("too many shared pointers ");
+                //}
             }
             // series
 
@@ -151,15 +154,32 @@ int main(int argc, char *argv[])
                 {
                     std::cout << "Sending Terminated Cascades : " << msg_properties << std::endl;
                     TerminatedMessageBuilder.payload(msg_properties);
-                    int i = 0;
                     for (auto T_obs : time.observation)
                     {
                         auto T_obs_key = std::to_string(T_obs);
-                        TerminatedMessageBuilder.partition(i);
-                        i++;
                         TerminatedMessageBuilder.key(T_obs_key);
 
-                        producer.produce(TerminatedMessageBuilder);
+                        try
+                        {
+                            // Try to send message
+                            producer.produce(TerminatedMessageBuilder);
+                        }
+                        catch (const cppkafka::HandleException &e)
+                        {
+                            std::ostringstream ostr;
+                            ostr << e.what();
+                            std::string error{ostr.str()};
+                            if (error.compare("Queue full") != 0)
+                            {
+                                std::chrono::milliseconds timeout(1200);
+                                producer.flush(timeout);
+                                producer.produce(TerminatedMessageBuilder);
+                            }
+                            else
+                            {
+                                std::cout << "Something went wrong: " << e.what() << std::endl;
+                            }
+                        }
                     }
                 }
             }

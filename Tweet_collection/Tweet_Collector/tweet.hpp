@@ -292,12 +292,9 @@ namespace tweetoscope
                         {
                             std::ostringstream ostr = ref_cascade->make_size(source_time);
 
-                            std::ostringstream os = ref_cascade->make_size(source_time);
-
                             //cascade_properties { 'type' : 'size', 'cid': 'tw23981', 'n_tot': 127, 't_end': 4329 }
 
                             data.push_back(ostr.str());
-                            os << std::endl;
                         }
 
                         cascade_queue.pop();
