@@ -111,9 +111,10 @@ int main(int argc, char *argv[])
 
                     ref_cascade->cascade_update(twt, key);
                     processor->update_newest_source_time(twt);
-                    if (ref_cascade != nullptr)
+
+                    if (map_key_location[key].node_ != 0)
                     {
-                        //processor->decrease_priority(map_key_location[key], ref_cascade);
+                        processor->decrease_priority(map_key_location[key], ref_cascade);
                     }
                 }
                 else
