@@ -1,6 +1,19 @@
 stages :
     - build_image
 
+kafka_build :
+    stage: build_image
+
+    image: docker:latest
+
+    services: 
+        - docker:dind
+    script:
+        - cd Test_Build
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $CI_REGISTRY_IMAGE/kafka -f Dockerfile.kafka  .
+        - docker push $CI_REGISTRY_IMAGE/kafka
+
 generator_build :
     stage: build_image
 
@@ -18,86 +31,86 @@ generator_build :
             - Tweet_collection/Tweet_Generator/*
 
 
-collector_build :
-    stage: build_image
+# collector_build :
+#     stage: build_image
 
-    image: docker:latest
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector .
-        - docker push $CI_REGISTRY_IMAGE/collector
-    only:
-        changes :
-          - Tweet_collection/Tweet_Collector/*
-
-
-estimator_build :
-    stage: build_image
-
-    image: docker:latest
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/estimator -f Dockerfile.estimator .
-        - docker push $CI_REGISTRY_IMAGE/estimator
-    only:
-        changes :
-          - Hawks_processes/*
-          - Pipeline_ai/estimator.py
+#     image: docker:latest
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector .
+#         - docker push $CI_REGISTRY_IMAGE/collector
+#     only:
+#         changes :
+#           - Tweet_collection/Tweet_Collector/*
 
 
+# estimator_build :
+#     stage: build_image
 
-predictor_build :
-    stage: build_image
-
-    image: docker:latest
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/predictor -f Dockerfile.predictor .
-        - docker push $CI_REGISTRY_IMAGE/predictor
-    only:
-        changes :
-          - Hawks_processes/*
-          - Pipeline_ai/predictor.py
+#     image: docker:latest
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/estimator -f Dockerfile.estimator .
+#         - docker push $CI_REGISTRY_IMAGE/estimator
+#     only:
+#         changes :
+#           - Pipeline_ai/Hawks_processes/*
+#           - Pipeline_ai/estimator.py
 
 
-learner_build :
-    stage: build_image
-    image: docker:latest
 
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/learner -f Dockerfile.learner .
-        - docker push $CI_REGISTRY_IMAGE/learner
-    only:
-        changes:
-          - Hawks_processes/*
-          - Pipeline_ai/learner.py
+# predictor_build :
+#     stage: build_image
+
+#     image: docker:latest
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/predictor -f Dockerfile.predictor .
+#         - docker push $CI_REGISTRY_IMAGE/predictor
+#     only:
+#         changes :
+#           - Pipeline_ai/Hawks_processes/*
+#           - Pipeline_ai/predictor.py
+
+
+# learner_build :
+#     stage: build_image
+#     image: docker:latest
+
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/learner -f Dockerfile.learner .
+#         - docker push $CI_REGISTRY_IMAGE/learner
+#     only:
+#         changes:
+#           - Pipeline_ai/Hawks_processes/*
+#           - Pipeline_ai/learner.py
     
 
-logger_build :
-    stage: build_image
-    image: docker:latest
+# logger_build :
+#     stage: build_image
+#     image: docker:latest
 
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/logger -f Dockerfile.logger .
-        - docker push $CI_REGISTRY_IMAGE/logger
-    only:
-        changes:
-          - Pipeline_ai/logger.py
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/logger -f ./Dockerfile.logger .
+#         - docker push $CI_REGISTRY_IMAGE/logger
+#     only:
+#         changes:
+#           - Pipeline_ai/logger.py
 
