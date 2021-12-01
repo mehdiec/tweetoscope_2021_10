@@ -1,6 +1,18 @@
 stages :
     - build_image
 
+kafka_build :
+    stage: build_image
+    image: docker:latest
+    services : 
+        - docker:dind
+    allow_failure: false
+    script:
+        - cd Test_Build
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $CI_REGISTRY_IMAGE/kafka-f Dockerfile.kafka .
+        - docker push $CI_REGISTRY_IMAGE/kafka   
+
 generator_build :
     stage: build_image
 
@@ -100,16 +112,4 @@ logger_build :
     only:
         changes:
           - Pipeline_ai/logger.py
-
-kafka_build :
-    stage: build_image
-    image: docker:latest
-    services : 
-        - docker:dind
-    allow_failure: false
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/kafka-f Dockerfile.kafka .
-        - docker push $CI_REGISTRY_IMAGE/kafka   
 
