@@ -28,6 +28,7 @@ consumer_learner = KafkaConsumer(
     bootstrap_servers=args.broker_list,
     value_deserializer=lambda m: pickle.loads(m),
     key_deserializer=lambda v: v.decode(),  # How to deserialize the key (if any)
+    request_timeout_ms=1000,
 )
 
 
@@ -38,18 +39,19 @@ producer = KafkaProducer(
     ),  # How to serialize the value to a binary buffer
     key_serializer=str.encode,  # How to serialize the key
 )
-# consumer.subscribe(["cascade_properties", "models"])
-# check the two type of mesages either size or params use
-# create dict with cid as a key to have all the data
+
 logger = logger.get_logger("predictor", broker_list=args.broker_list, debug=True)
 
 
 cid_n_tot_dict = {}  # dictionnary with cid as keys and n_tot as values
 cid_params_dict = {}  # dictionary with cid as keys and params as value
+
+
 for msg in consumer_properties:
     alpha, mu = 2.4, 10
     msg_value = msg.value
     w_true = None
+    logger.debug("received new properties " + msg_value["type"])
 
     if msg_value["type"] == "parameters":
         # { 'type': 'parameters', 'cid': 'tw23981', 'msg' : 'blah blah', 'n_obs': 32, 'n_supp' : 120, 'params': [ 0.0423, 124.312 ], n_star G1 }
@@ -60,6 +62,7 @@ for msg in consumer_properties:
         cid = msg_value["cid"]
         n_star = msg_value["n_star"]
         G1 = msg_value["G1"]
+
         if cid not in cid_n_tot_dict.keys():
             cid_params_dict[cid] = msg_value
         else:
@@ -111,21 +114,22 @@ for msg in consumer_properties:
             "X": [params[1], G1, n_star],
             "W": w_true,
         }
-        producer.send("cascade_samples", key=T_obs, value=value_sample)
-
-        logger.debug("send to learner: ", value_sample)
         for msg_model in consumer_learner:
             model = msg_model.value
             break
+        producer.send("cascade_samples", key=T_obs, value=value_sample)
+
+        logger.debug("send to learner: ", value_sample)
         if msg_model:
 
-            logger.debug("model T_obs value " + msg_model.key)
-            logger.debug("messaage T_obs value " + T_obs)
+            logger.debug("received new model!")
 
-            w_model = model.predict([[params[1], G1, n_star]])
-            n_model = n + w_model[0] * (G1 / (1 - n_star))
+            # w_model = model.predict([[params[1], G1, n_star]])
+            # n_model = n + w_model[0] * (G1 / (1 - n_star))
+            n_model = estimator.prediction_one_shot(n, model)[0]
+
             T_obs = msg_model.key
-            if n_model > 100:
+            if n_model > 1:
                 # Key = None Value = { 'type': 'alert', 'cid': 'tw23981', 'msg' : 'blah blah', 'T_obs': 600, 'n_tot' : 158 }
                 alert_value = {
                     "type": "alert",
