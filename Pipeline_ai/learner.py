@@ -30,8 +30,12 @@ consumer_samples = KafkaConsumer(
 )
 logger = logger.get_logger("learner", broker_list=args.broker_list, debug=True)
 
-features = []
-targets = []
+
+dict_obs_features_target = {
+    "300": {"features": [], "targets": []},
+    "600": {"features": [], "targets": []},
+    "1200": {"features": [], "targets": []},
+}
 time2train = [i for i in range(1, 21)]
 
 # Reading samples topic.
@@ -39,15 +43,18 @@ for msg in consumer_samples:
 
     # Getting the data from msg
     T_obs = msg.key
+
+    features = dict_obs_features_target[T_obs]["features"]
+    targets = dict_obs_features_target[T_obs]["targets"]
     msg = msg.value
     features.append(msg["X"])
     w = msg["W"]
     targets.append(w)
 
-    if (len(features) % 10 == 0) or len(features) in time2train:
-        logger.debug("learner do be learning number of samples:" + str(len(features)))
-        regr = RandomForestRegressor()  # We compute a new forest.
-        model = regr.fit(features, targets)
-        logger.info("New model for T_obs =" + str(T_obs))
-        producer_models.send("cascade_model", key=T_obs, value=model)
+    logger.debug("learner do be learning number of samples:" + str(len(features)))
+    regr = RandomForestRegressor()  # We compute a new forest.
+    model = regr.fit(features, targets)
+    logger.info("New model for T_obs =" + str(T_obs))
+    producer_models.send("cascade_model", key=T_obs, value=model)
+
 producer_models.flush()
