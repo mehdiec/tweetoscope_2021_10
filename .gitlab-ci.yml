@@ -3,8 +3,9 @@ stages :
 
 generator_build :
     stage: build_image
-    allow_failure: false
+
     image: docker:latest
+    allow_failure: false
     services: 
         - docker:dind
     script:
