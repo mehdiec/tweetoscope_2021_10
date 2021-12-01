@@ -295,6 +295,7 @@ namespace tweetoscope
                             //cascade_properties { 'type' : 'size', 'cid': 'tw23981', 'n_tot': 127, 't_end': 4329 }
 
                             data.push_back(ostr.str());
+                            ref_cascade.reset();
                         }
 
                         cascade_queue.pop();
