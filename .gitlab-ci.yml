@@ -14,37 +14,37 @@ kafka_build :
         - docker build -t $CI_REGISTRY_IMAGE/kafka -f Dockerfile.kafka  .
         - docker push $CI_REGISTRY_IMAGE/kafka
 
-generator_build :
-    stage: build_image
+# generator_build :
+#     stage: build_image
 
-    image: docker:latest
+#     image: docker:latest
 
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/generator -f Dockerfile.tweetgenerator  .
-        - docker push $CI_REGISTRY_IMAGE/generator
-    only:
-        changes:
-            - Tweet_collection/Tweet_Generator/*
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/generator -f Dockerfile.tweetgenerator  .
+#         - docker push $CI_REGISTRY_IMAGE/generator
+#     only:
+#         changes:
+#             - Tweet_collection/Tweet_Generator/*
 
 
-collector_build :
-    stage: build_image
+# collector_build :
+#     stage: build_image
 
-    image: docker:latest
-    services: 
-        - docker:dind
-    script:
-        - cd Test_Build
-        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector .
-        - docker push $CI_REGISTRY_IMAGE/collector
-    only:
-        changes :
-          - Tweet_collection/Tweet_Collector/*
+#     image: docker:latest
+#     services: 
+#         - docker:dind
+#     script:
+#         - cd Test_Build
+#         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#         - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector .
+#         - docker push $CI_REGISTRY_IMAGE/collector
+#     only:
+#         changes :
+#           - Tweet_collection/Tweet_Collector/*
 
 
 estimator_build :
@@ -54,6 +54,7 @@ estimator_build :
     services: 
         - docker:dind
     script:
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker build -t $CI_REGISTRY_IMAGE/estimator -f Test_Build/Dockerfile.estimator .
         - docker push $CI_REGISTRY_IMAGE/estimator
