@@ -54,7 +54,7 @@ estimator_build :
     services: 
         - docker:dind
     script:
-        - cd Pipeline_ai
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker build -t $CI_REGISTRY_IMAGE/estimator -f Dockerfile.estimator ../
         - docker push $CI_REGISTRY_IMAGE/estimator
@@ -72,9 +72,9 @@ predictor_build :
     services: 
         - docker:dind
     script:
-        - cd Pipeline_ai
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/predictor -f Dockerfile.predictor .
+        - docker build -t $CI_REGISTRY_IMAGE/predictor -f Dockerfile.predictor ../
         - docker push $CI_REGISTRY_IMAGE/predictor
     only:
         changes :
