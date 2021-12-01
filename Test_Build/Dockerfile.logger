@@ -2,8 +2,7 @@ FROM python:3.8-slim
 
 ### Libraries Installation ###
 RUN pip install --upgrade pip
-RUN pip3 install numpy \
-kafka-python \
+RUN pip3 install kafka-python \
 termcolor
 
 ### Adding file ###
