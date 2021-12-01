@@ -1,0 +1,12 @@
+FROM python:3.8-slim
+
+RUN pip install --upgrade pip
+RUN pip3 install numpy \
+scikit-learn \
+kafka-python \
+termcolor
+
+ADD ./tweetoscope/Hawks_processes Hawks_processes
+ADD ./tweetoscope/learner.py .
+
+CMD python3 learner.py --broker-list kafka-service:9092 --obs-wind 300
