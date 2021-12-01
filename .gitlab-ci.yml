@@ -5,7 +5,7 @@ generator_build :
     stage: build_image
 
     image: docker:latest
-    allow_failure: false
+
     services: 
         - docker:dind
     script:
@@ -20,7 +20,7 @@ generator_build :
 
 collector_build :
     stage: build_image
-    allow_failure: false
+
     image: docker:latest
     services: 
         - docker:dind
@@ -36,7 +36,7 @@ collector_build :
 
 estimator_build :
     stage: build_image
-    allow_failure: false
+
     image: docker:latest
     services: 
         - docker:dind
@@ -54,7 +54,7 @@ estimator_build :
 
 predictor_build :
     stage: build_image
-    allow_failure: false
+
     image: docker:latest
     services: 
         - docker:dind
@@ -72,7 +72,7 @@ predictor_build :
 learner_build :
     stage: build_image
     image: docker:latest
-    allow_failure: false
+
     services: 
         - docker:dind
     script:
@@ -89,7 +89,7 @@ learner_build :
 logger_build :
     stage: build_image
     image: docker:latest
-    allow_failure: false
+
     services: 
         - docker:dind
     script:
