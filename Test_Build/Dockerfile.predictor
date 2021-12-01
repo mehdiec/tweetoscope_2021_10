@@ -3,6 +3,7 @@ FROM python:3.8-slim
 ### Libraries Installation ###
 RUN pip install --upgrade pip
 RUN pip3 install numpy \
+scikit-learn \
 kafka-python \
 termcolor
 
