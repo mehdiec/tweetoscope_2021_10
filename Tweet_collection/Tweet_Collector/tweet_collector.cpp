@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
             tweetoscope::cascade::Processor *processor = &map_idf_processor.at(twt.source);
             if (twt.type == "tweet")
             {
+
                 // updating the source time of the processor
                 processor->update_newest_source_time(twt);
                 cascade_ref ref_cascade = tweetoscope::cascade::Cascade::make_cascade_ref(twt, key);
@@ -118,12 +119,8 @@ int main(int argc, char *argv[])
                     else
                     {
                         processor->symbol_table.erase(key);
+                        map_key_location.erase(key);
                     }
-                }
-                else
-                {
-                    map_key_location.erase(key);        // if expired, remove from map_key_location
-                    processor->symbol_table.erase(key); // if expired, remove from symbol_table
                 }
             }
             // series

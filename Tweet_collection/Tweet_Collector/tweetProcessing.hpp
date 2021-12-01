@@ -132,6 +132,7 @@ namespace tweetoscope
         {
 
             source::idf source;
+            timestamp first_tweet;
             timestamp source_time;
             timestamp newest_source_time;
             priority_queue cascade_queue;
@@ -148,7 +149,7 @@ namespace tweetoscope
              * @param twt a tweet.
              * 
              */
-            Processor(tweet &twt) : source(twt.source), source_time(twt.time), newest_source_time(twt.time), cascade_queue{}, fifo{}, symbol_table{} {};
+            Processor(tweet &twt) : source(twt.source), first_tweet(twt.time), source_time(twt.time), newest_source_time(twt.time), cascade_queue{}, fifo{}, symbol_table{} {};
 
             /**
              * updates the source time of a processor.
@@ -186,7 +187,7 @@ namespace tweetoscope
             bool terminated(timestamp &t_terminated, cascade_ref ref_cascade, bool observation = false)
             {
                 if (observation)
-                    return ((newest_source_time - source_time) > t_terminated);
+                    return ((source_time - first_tweet) > t_terminated);
                 else
                 {
                     if ((newest_source_time - source_time) > t_terminated)
