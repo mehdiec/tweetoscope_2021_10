@@ -25,7 +25,7 @@ ENV PKG_CONFIG_PATH=/gaml/gaml/build
 ADD ./Tweet_collection/Tweet_Generator/news-index.csv .
 ADD ./Tweet_collection/Tweet_Generator/news-data.csv . 
 ADD ./Tweet_collection/Tweet_Generator/params.config .
-ADD ./Tweet_collection/Tweet_Generator/Tweet_Generator/tweetoscopeGenerator.hpp .
+ADD ./Tweet_collection/Tweet_Generator/tweetoscopeGenerator.hpp .
 ADD ./Tweet_collection/Tweet_Generator/tweet-generator.cpp .
 
 ### Running command ###
