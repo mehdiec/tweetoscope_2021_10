@@ -47,7 +47,7 @@ estimator_build :
         - docker push $CI_REGISTRY_IMAGE/estimator
     only:
         changes :
-          - Hawks_processes/*
+          - Pipeline_ai/Hawks_processes/*
           - Pipeline_ai/estimator.py
 
 
@@ -65,7 +65,7 @@ predictor_build :
         - docker push $CI_REGISTRY_IMAGE/predictor
     only:
         changes :
-          - Hawks_processes/*
+          - Pipeline_ai/Hawks_processes/*
           - Pipeline_ai/predictor.py
 
 
@@ -82,7 +82,7 @@ learner_build :
         - docker push $CI_REGISTRY_IMAGE/learner
     only:
         changes:
-          - Hawks_processes/*
+          - Pipeline_ai/Hawks_processes/*
           - Pipeline_ai/learner.py
     
 
@@ -95,7 +95,7 @@ logger_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/logger -f Dockerfile.logger .
+        - docker build -t $CI_REGISTRY_IMAGE/logger -f ./Dockerfile.logger .
         - docker push $CI_REGISTRY_IMAGE/logger
     only:
         changes:
