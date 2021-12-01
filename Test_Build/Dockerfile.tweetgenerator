@@ -2,6 +2,8 @@ FROM ubuntu
 
 ### Libraries Installation ###
 RUN apt-get update
+ENV TZ=Europe/Paris
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt install -y build-essential pkg-config
 RUN apt-get install -y cmake 
 RUN apt-get install -y libboost-all-dev 
