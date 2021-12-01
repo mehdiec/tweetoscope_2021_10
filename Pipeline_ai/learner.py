@@ -5,14 +5,7 @@ from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producder
 from sklearn.ensemble import RandomForestRegressor
 import pickle
-
-
-# Topics's name
-
-
-# topics'key
-# key_dic ={"300":0, "600":1, "1200":2}
-
+import logger
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("--broker-list", type=str, required=True, help="the broker list")
@@ -35,7 +28,7 @@ consumer_samples = KafkaConsumer(
     key_deserializer=lambda v: v.decode(),
     auto_offset_reset="earliest",
 )
-
+logger = logger.get_logger("learner", broker_list=args.broker_list, debug=True)
 
 features = []
 targets = []
@@ -52,11 +45,9 @@ for msg in consumer_samples:
     targets.append(w)
 
     if (len(features) % 10 == 0) or len(features) in time2train:
-
-        print("learner do be learning", len(features))
-
+        logger.debug("learner do be learning number of samples:" + str(len(features)))
         regr = RandomForestRegressor()  # We compute a new forest.
         model = regr.fit(features, targets)
-
+        logger.info("New model for T_obs =" + str(T_obs))
         producer_models.send("cascade_model", key=T_obs, value=model)
 producer_models.flush()
