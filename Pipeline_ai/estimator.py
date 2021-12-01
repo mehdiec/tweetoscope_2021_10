@@ -4,6 +4,7 @@ import numpy as np
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producer
 from Hawks_processes.Models.estimation import MAP
+import logger
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("--broker-list", type=str, required=True, help="the broker list")
@@ -22,6 +23,7 @@ producer = KafkaProducer(
     key_serializer=lambda v: json.dumps(v).encode("utf-8"),
 )
 
+logger = logger.get_logger("estimator", broker_list=args.broker_list, debug=True)
 
 for msg in consumer:
     alpha, mu = 2.4, 10
@@ -53,5 +55,6 @@ for msg in consumer:
         "n_star": estimator.n_star,
         "G1": estimator.G1,
     }
+    logger.info("sending properties")
     producer.send("cascade_properties", key=key, value=value)
 producer.flush()

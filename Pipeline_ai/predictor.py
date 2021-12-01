@@ -5,6 +5,7 @@ import pickle
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producer
 from sklearn.ensemble import RandomForestRegressor
+import logger
 
 
 from Hawks_processes.Models.predict import HawksProcess
@@ -40,16 +41,16 @@ producer = KafkaProducer(
 # consumer.subscribe(["cascade_properties", "models"])
 # check the two type of mesages either size or params use
 # create dict with cid as a key to have all the data
+logger = logger.get_logger("predictor", broker_list=args.broker_list, debug=True)
+
 
 cid_n_tot_dict = {}  # dictionnary with cid as keys and n_tot as values
 cid_params_dict = {}  # dictionary with cid as keys and params as value
-
 for msg in consumer_properties:
     alpha, mu = 2.4, 10
     msg_value = msg.value
-
     w_true = None
-    print("msg value : ", msg_value)
+
     if msg_value["type"] == "parameters":
         # { 'type': 'parameters', 'cid': 'tw23981', 'msg' : 'blah blah', 'n_obs': 32, 'n_supp' : 120, 'params': [ 0.0423, 124.312 ], n_star G1 }
         # Getting data from msg
@@ -111,11 +112,16 @@ for msg in consumer_properties:
             "W": w_true,
         }
         producer.send("cascade_samples", key=T_obs, value=value_sample)
-        print("send to learner: ", value_sample)
+
+        logger.debug("send to learner: ", value_sample)
         for msg_model in consumer_learner:
             model = msg_model.value
             break
         if msg_model:
+
+            logger.debug("model T_obs value " + msg_model.key)
+            logger.debug("messaage T_obs value " + T_obs)
+
             w_model = model.predict([[params[1], G1, n_star]])
             n_model = n + w_model[0] * (G1 / (1 - n_star))
             T_obs = msg_model.key
@@ -128,7 +134,8 @@ for msg in consumer_properties:
                     "T_obs": key,
                     "n_tot": n_model,
                 }
-                print("poppin tweet", alert_value)
+                logger.info("Viral Tweet")
+                logger.debug(alert_value)
                 producer.send("cascade_alert", key=T_obs, value=alert_value)
 
             are = np.abs(n_model - n_tot) / n_tot
@@ -140,7 +147,8 @@ for msg in consumer_properties:
                 "T_obs": key,
                 "ARE": are,
             }
-            print("stats obtained: ", stat_value)
+            logger.info("New insight!")
+            logger.debug("ARE value " + str(are))
 
             producer.send("cascade_stat", key=T_obs, value=stat_value)
 
