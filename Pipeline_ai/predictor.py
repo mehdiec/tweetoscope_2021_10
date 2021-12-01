@@ -82,11 +82,12 @@ for msg in consumer:
             cid = msg_value["cid"]
             n_star = msg_value["n_star"]
             G1 = msg_value["G1"]
+            key = msg.key
 
-            if cid not in cid_n_tot_dict.keys():
-                cid_params_dict[cid] = msg_value
+            if (cid, key) not in cid_n_tot_dict.keys():
+                cid_params_dict[(cid, key)] = msg_value
             else:
-                n_tot = cid_n_tot_dict[cid]
+                n_tot = cid_n_tot_dict[(cid, key)]
                 estimator = HawksProcess(
                     alpha=alpha, mu=mu, n_star=n_star, params=params, G1=G1
                 )
@@ -99,10 +100,6 @@ for msg in consumer:
             T_obs = msg.key
 
         elif msg_value["type"] == "size":
-            logger.debug(
-                "======================================="
-                "finished" + "======================================="
-            )
 
             # { 'type' : 'size', 'cid': 'tw23981', 'n_tot': 127, 't_end': 4329 }
             cid = msg_value["cid"]
@@ -110,12 +107,12 @@ for msg in consumer:
 
             t_end = msg_value["t_end"]
             T_obs = msg.key
-            if cid not in cid_params_dict.keys():
-                cid_n_tot_dict[cid] = n_tot
+            if (cid, T_obs) not in cid_params_dict.keys():
+                cid_n_tot_dict[(cid, T_obs)] = n_tot
 
             else:
 
-                msg_params = cid_params_dict[cid]
+                msg_params = cid_params_dict[(cid, key)]
                 n_star = msg_params["n_star"]
                 G1 = msg_params["G1"]
                 params = msg_params["params"]
@@ -148,14 +145,12 @@ for msg in consumer:
         if dict_model[msg.key]:
             model = dict_model[msg.key]
 
-            logger.debug("Got a model!")
-
         # w_model = model.predict([[params[1], G1, n_star]])
         # n_model = n + w_model[0] * (G1 / (1 - n_star))
         n_model = estimator.prediction_one_shot(n, model)
 
         T_obs = msg.key
-        if n_model > 10:
+        if n_model > 150:
             # Key = None Value = { 'type': 'alert', 'cid': 'tw23981', 'msg' : 'blah blah', 'T_obs': 600, 'n_tot' : 158 }
             alert_value = {
                 "type": "alert",
@@ -165,12 +160,15 @@ for msg in consumer:
                 "n_tot": int(n_model),
             }
             logger.info(
-                "Viral Tweet n_tot " + str(n_model) + "observation window " + str(T_obs)
+                "Viral Tweet n_tot "
+                + str(n_model)
+                + " observation window "
+                + str(T_obs)
             )
 
             producer.send("cascade_alert", key=T_obs, value=alert_value)
         if n_tot:
-            logger.debug(
+            logger.info(
                 "======================================="
                 "stat" + "======================================="
             )
@@ -195,6 +193,7 @@ for msg in consumer:
                 + str(T_obs)
             )
             logger.debug("ARE value " + str(are))
+            logger.info("==============================================")
 
             producer.send("cascade_stat", key=T_obs, value=stat_value)
             n_tot = None
