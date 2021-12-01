@@ -22,7 +22,7 @@ RUN cd gaml; mkdir -p gaml/build;cd gaml/build;cmake .. -DCMAKE_INSTALL_PREFIX=/
 ENV PKG_CONFIG_PATH=/gaml/gaml/build
 
 ### Adding files ###
-ADD /Tweet_collection/Tweet_Collector .
+ADD /Tweet_collection/Tweet_Collector ./
 ADD /Tweet_collection/Tweet_Collector/collector.ini .
 
 ### Running command ###
