@@ -85,50 +85,6 @@ class HawksProcess:
 
         return Ntot
 
-    def predict(self, history, T=None):
-        """
-        Returns the expected total numbers of points for a set of time points
-
-        params   -- parameter tuple (p,beta) of the Hawkes process
-        history  -- (n,2) numpy array containing marked time points (t_i,m_i)
-        alpha    -- power parameter of the power-law mark distribution
-        mu       -- min value parameter of the power-law mark distribution
-        T        -- 1D-array of times (i.e ends of observation window)
-        """
-
-        p, beta = self.params
-
-        tis = history[:, 0]
-        if T is None:
-            T = np.linspace(60, tis[-1], 1000)
-
-        N = np.zeros((len(T), 2))
-        N[:, 0] = T
-
-        EM = self.mu * (self.alpha - 1) / (self.alpha - 2)
-        self.n_star = p * EM
-
-        if self.n_star >= 1:
-
-            raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
-
-        Si, ti_prev, i = 0.0, 0.0, 0
-
-        for j, t in enumerate(T):
-            for (ti, mi) in history[i:]:
-                if ti >= t:
-                    break
-
-                Si = Si * np.exp(-beta * (ti - ti_prev)) + mi
-                ti_prev = ti
-                i += 1
-
-            n = i + 1
-            self.G1 = p * Si * np.exp(-beta * (t - ti_prev))
-            N[j, 1] = n + self.G1 / (1.0 - self.n_star)
-
-        return N
-
     def prediction_one_shot(self, n, model=None):
         """
         Returns the expected total numbers of points for a set of time points
@@ -144,7 +100,9 @@ class HawksProcess:
             raise Exception(f"Branching factor {self.n_star:.2f} greater than one")
 
         if model is not None:
-            omega = model(beta, self.n_star, self.G1)
+            omega = model.predict(
+                np.array([beta, self.G1, self.n_star]).reshape(1, -1)
+            )[0]
 
             Ntot = n + omega * self.G1 / (1.0 - self.n_star)
 
