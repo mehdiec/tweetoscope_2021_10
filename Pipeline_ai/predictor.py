@@ -4,6 +4,8 @@ import numpy as np
 import pickle
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producer
+from sklearn.ensemble import RandomForestRegressor
+
 
 from Hawks_processes.Models.predict import HawksProcess
 
@@ -20,8 +22,8 @@ consumer_properties = KafkaConsumer(
     key_deserializer=lambda v: v.decode(),  # How to deserialize the key (if any)
 )
 
-consumer_samples = KafkaConsumer(
-    "cascade_samples",
+consumer_learner = KafkaConsumer(
+    "cascade_model",
     bootstrap_servers=args.broker_list,
     value_deserializer=lambda m: pickle.loads(m),
     key_deserializer=lambda v: v.decode(),  # How to deserialize the key (if any)
@@ -99,18 +101,47 @@ for msg in consumer_properties:
             except ZeroDivisionError:
                 w_true = -1
     else:
-        print("N tot fir T_obs is : " + str(T_obs) + " And cid is :" + str(cid))
+        print("N tot for T_obs is : " + str(T_obs) + " And cid is :" + str(cid))
         continue
 
     if w_true:
         key = T_obs
         value_sample = {
             "type": "sample",
-            "cid": "tw23981",
+            "cid": cid,
             "X": [params[1], G1, n_star],
             "W": w_true,
         }
 
-        producer.send("cascade_samples", key=T_obs, value=value_sample)
+    for msg_model in consumer_learner:
+        break
+    if msg_model:
+        w_model = msg_model.value.predict([[params[1], G1, n_star]])
+        n_model = n + w_model[0] * (G1 / (1 - n_star))
+        T_obs = msg_model.key
+        if n_model > 100:
+            # Key = None Value = { 'type': 'alert', 'cid': 'tw23981', 'msg' : 'blah blah', 'T_obs': 600, 'n_tot' : 158 }
+            alert_value = {
+                "type": "alert",
+                "cid": cid,
+                "msg": "blah blah",
+                "T_obs": key,
+                "n_tot": n_model,
+            }
+            producer.send("cascade_alert", key=T_obs, value=alert_value)
+
+        are = np.append(n_model - n_tot) / n_tot
+
+        # Key = None Value = { 'type': 'stat', 'cid': 'tw23981', 'T_obs': 600, 'ARE' : 0.93 }
+        stat_value = {
+            "type": "stat",
+            "cid": cid,
+            "T_obs": key,
+            "ARE": are,
+        }
+
+        producer.send("cascade_stat", key=T_obs, value=stat_value)
+
+    producer.send("cascade_samples", key=T_obs, value=value_sample)
 
 producer.flush()

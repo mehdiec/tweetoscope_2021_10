@@ -3,15 +3,12 @@ import argparse  # To parse command line arguments
 import json  # To parse and dump JSON
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producder
-from kafka import TopicPartition
 from sklearn.ensemble import RandomForestRegressor
 import pickle
 
 
 # Topics's name
 
-samples_topic = "samples"  # Reading from
-models_topic = "models"  # Writing to
 
 # topics'key
 # key_dic ={"300":0, "600":1, "1200":2}
@@ -34,7 +31,7 @@ producer_models = KafkaProducer(
 
 # Consumer
 consumer_samples = KafkaConsumer(
-    X,  # METTRE LE BON TRUC,
+    "cascade_samples",
     bootstrap_servers=args.broker_list,
     value_deserializer=lambda v: json.loads(v.decode("utf-8")),
     key_deserializer=lambda v: v.decode(),
@@ -43,19 +40,9 @@ consumer_samples = KafkaConsumer(
 )
 
 
-X = []
-W = []
+features = []
+targets = []
 
-min_samples = [
-    10,
-    20,
-    50,
-    100,
-]  # We compute a random forest when 1/5/10/20/50/100 samples are received or every 100 samples received.
-
-logger = logger.get_logger(
-    "Learner", broker_list=args.broker_list, debug=True
-)  # Identify the node of origin of the message.
 
 # Reading samples topic.
 for msg in consumer_samples:
@@ -63,14 +50,14 @@ for msg in consumer_samples:
     # Getting the data from msg
     T_obs = msg.key
     msg = msg.value
-    X.append(msg["X"])
+    features.append(msg["X"])
     w = msg["W"]
-    W.append(w)
+    targets.append(w)
 
-    if len(X) in min_samples:
+    if len(features) % 10 == 0:
 
         regr = RandomForestRegressor()  # We compute a new forest.
-        model = regr.fit(X, W)
+        model = regr.fit(features, targets)
 
-        producer_models.send(models_topic, model)
+        producer_models.send("cascade_model", model)
 producer_models.flush()
