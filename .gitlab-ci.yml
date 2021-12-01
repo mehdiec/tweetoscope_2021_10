@@ -54,9 +54,9 @@ estimator_build :
     services: 
         - docker:dind
     script:
-        - cd Test_Build
+
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/estimator -f Dockerfile.estimator .
+        - docker build -t $CI_REGISTRY_IMAGE/estimator -f Test_Build/Dockerfile.estimator .
         - docker push $CI_REGISTRY_IMAGE/estimator
     only:
         changes :
