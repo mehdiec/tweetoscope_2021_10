@@ -55,6 +55,6 @@ for msg in consumer:
         "n_star": estimator.n_star,
         "G1": estimator.G1,
     }
-    logger = logger.info("sending properties")
+    logger.info("sending properties")
     producer.send("cascade_properties", key=key, value=value)
 producer.flush()

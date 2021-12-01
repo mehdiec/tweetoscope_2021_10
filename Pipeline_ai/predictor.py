@@ -118,6 +118,10 @@ for msg in consumer_properties:
             model = msg_model.value
             break
         if msg_model:
+
+            logger.debug("model T_obs value " + msg_model.key)
+            logger.debug("messaage T_obs value " + T_obs)
+
             w_model = model.predict([[params[1], G1, n_star]])
             n_model = n + w_model[0] * (G1 / (1 - n_star))
             T_obs = msg_model.key
@@ -144,7 +148,7 @@ for msg in consumer_properties:
                 "ARE": are,
             }
             logger.info("New insight!")
-            logger.debug(stat_value)
+            logger.debug("ARE value " + str(are))
 
             producer.send("cascade_stat", key=T_obs, value=stat_value)
 
