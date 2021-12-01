@@ -11,7 +11,7 @@ generator_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.tweetgenerator -t $CI_REGISTRY_IMAGE/generator  .
+        - docker build -t $CI_REGISTRY_IMAGE/generator -f Dockerfile.tweetgenerator  .
         - docker push $CI_REGISTRY_IMAGE/generator
     only:
         changes:
@@ -27,7 +27,7 @@ collector_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.collector -t $CI_REGISTRY_IMAGE/collector .
+        - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector .
         - docker push $CI_REGISTRY_IMAGE/collector
     only:
         changes :
@@ -43,7 +43,7 @@ estimator_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.estimator -t $CI_REGISTRY_IMAGE/estimator .
+        - docker build -t $CI_REGISTRY_IMAGE/estimator -f Dockerfile.estimator .
         - docker push $CI_REGISTRY_IMAGE/estimator
     only:
         changes :
@@ -61,7 +61,7 @@ predictor_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.predictor -t $CI_REGISTRY_IMAGE/predictor .
+        - docker build -t $CI_REGISTRY_IMAGE/predictor -f Dockerfile.predictor .
         - docker push $CI_REGISTRY_IMAGE/predictor
     only:
         changes :
@@ -78,7 +78,7 @@ learner_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.learner -t $CI_REGISTRY_IMAGE/learner .
+        - docker build -t $CI_REGISTRY_IMAGE/learner -f Dockerfile.learner .
         - docker push $CI_REGISTRY_IMAGE/learner
     only:
         changes:
@@ -95,7 +95,7 @@ logger_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.logger -t $CI_REGISTRY_IMAGE/logger .
+        - docker build -t $CI_REGISTRY_IMAGE/logger -f Dockerfile.logger .
         - docker push $CI_REGISTRY_IMAGE/logger
     only:
         changes:
@@ -110,6 +110,6 @@ kafka_build :
     script:
         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -f Dockerfile.kafka -t $CI_REGISTRY_IMAGE/kafka  .
+        - docker build -t $CI_REGISTRY_IMAGE/kafka-f Dockerfile.kafka .
         - docker push $CI_REGISTRY_IMAGE/kafka   
 
