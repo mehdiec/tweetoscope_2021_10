@@ -3,7 +3,6 @@ import json  # To parse and dump JSON
 import numpy as np
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producer
-
 from Hawks_processes.Models.estimation import MAP
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)

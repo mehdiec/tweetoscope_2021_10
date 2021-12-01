@@ -3,26 +3,20 @@ import argparse  # To parse command line arguments
 import json  # To parse and dump JSON
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producder
-from kafka import TopicPartition
 from sklearn.ensemble import RandomForestRegressor
 import pickle
 
 
 # Topics's name
 
-samples_topic = "samples"  # Reading from
-models_topic = "models"  # Writing to
 
 # topics'key
 # key_dic ={"300":0, "600":1, "1200":2}
 
 
-# Arguments to write to run the file in a terminal  "python3 Hawkes --broker-list localhost:9092 --obs-wind 300".
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("--broker-list", type=str, required=True, help="the broker list")
-parser.add_argument(
-    "--obs-wind", type=str, required=True, help="the observation window : 300/600/1200"
-)  # In order to // the calculs.
+
 args = parser.parse_args()  # Parse arguments
 
 producer_models = KafkaProducer(
@@ -30,32 +24,22 @@ producer_models = KafkaProducer(
     value_serializer=lambda m: pickle.dumps(
         m
     ),  # How to serialize the value to a binary buffer using pickle this time because we send a forest not a message.
+    key_serializer=str.encode,
 )
 
 # Consumer
 consumer_samples = KafkaConsumer(
-    X,  # METTRE LE BON TRUC,
+    "cascade_samples",
     bootstrap_servers=args.broker_list,
     value_deserializer=lambda v: json.loads(v.decode("utf-8")),
     key_deserializer=lambda v: v.decode(),
     auto_offset_reset="earliest",
-    group_id="SamplesConsumerGroup-{}".format(args.obs_wind),
 )
 
 
-X = []
-W = []
-
-min_samples = [
-    10,
-    20,
-    50,
-    100,
-]  # We compute a random forest when 1/5/10/20/50/100 samples are received or every 100 samples received.
-
-logger = logger.get_logger(
-    "Learner", broker_list=args.broker_list, debug=True
-)  # Identify the node of origin of the message.
+features = []
+targets = []
+time2train = [i for i in range(1, 21)]
 
 # Reading samples topic.
 for msg in consumer_samples:
@@ -63,14 +47,16 @@ for msg in consumer_samples:
     # Getting the data from msg
     T_obs = msg.key
     msg = msg.value
-    X.append(msg["X"])
+    features.append(msg["X"])
     w = msg["W"]
-    W.append(w)
+    targets.append(w)
 
-    if len(X) in min_samples:
+    if (len(features) % 10 == 0) or len(features) in time2train:
+
+        print("learner do be learning", len(features))
 
         regr = RandomForestRegressor()  # We compute a new forest.
-        model = regr.fit(X, W)
+        model = regr.fit(features, targets)
 
-        producer_models.send(models_topic, model)
+        producer_models.send("cascade_model", key=T_obs, value=model)
 producer_models.flush()
