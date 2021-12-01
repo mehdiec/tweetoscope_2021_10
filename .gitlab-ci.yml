@@ -9,9 +9,9 @@ kafka_build :
     services: 
         - docker:dind
     script:
-
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/kafka -f ./Build_Test/Dockerfile.kafka  ./
+        - docker build -t $CI_REGISTRY_IMAGE/kafka -f Dockerfile.kafka  .
         - docker push $CI_REGISTRY_IMAGE/kafka
 
 generator_build :
@@ -22,9 +22,9 @@ generator_build :
     services: 
         - docker:dind
     script:
-
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/generator -f ./Build_Test/Dockerfile.tweetgenerator  .
+        - docker build -t $CI_REGISTRY_IMAGE/generator -f Dockerfile.tweetgenerator  ../
         - docker push $CI_REGISTRY_IMAGE/generator
     only:
         changes:
@@ -38,9 +38,9 @@ collector_build :
     services: 
         - docker:dind
     script:
-
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/collector -f ./Build_Test/Dockerfile.collector .
+        - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector ../
         - docker push $CI_REGISTRY_IMAGE/collector
     only:
         changes :
@@ -54,9 +54,9 @@ estimator_build :
     services: 
         - docker:dind
     script:
-
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/estimator -f ./Test_Build/Dockerfile.estimator .
+        - docker build -t $CI_REGISTRY_IMAGE/estimator -f Dockerfile.estimator ../
         - docker push $CI_REGISTRY_IMAGE/estimator
     only:
         changes :
@@ -72,9 +72,9 @@ predictor_build :
     services: 
         - docker:dind
     script:
-
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/predictor -f ./Build_Test/Dockerfile.predictor .
+        - docker build -t $CI_REGISTRY_IMAGE/predictor -f Dockerfile.predictor ../
         - docker push $CI_REGISTRY_IMAGE/predictor
     only:
         changes :
@@ -89,9 +89,9 @@ learner_build :
     services: 
         - docker:dind
     script:
-
+        - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/learner -f ./Build_Test/.learner .
+        - docker build -t $CI_REGISTRY_IMAGE/learner -f Dockerfile.learner ../
         - docker push $CI_REGISTRY_IMAGE/learner
     only:
         changes:
@@ -106,9 +106,9 @@ logger_build :
     services: 
         - docker:dind
     script:
- 
+         - cd Test_Build
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        - docker build -t $CI_REGISTRY_IMAGE/logger -f ./Build_Test/Dockerfile.logger .
+        - docker build -t $CI_REGISTRY_IMAGE/logger -f Dockerfile.logger ../
         - docker push $CI_REGISTRY_IMAGE/logger
     only:
         changes:
