@@ -3,7 +3,7 @@ FROM python:3.8-slim
 ### Librairies installations ###
 
 RUN pip install --upgrade pip
-RUN pip3 install numpy \
+RUN pip install numpy \
 scipy \
 matplotlib \
 pandas \
