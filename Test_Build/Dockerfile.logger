@@ -6,7 +6,7 @@ RUN pip3 install kafka-python \
 termcolor
 
 ### Adding file ###
-ADD ./Pipeline_ai/logger.py .
+ADD Pipeline_ai/logger.py .
 
 ### Running command ###
 CMD python3 logger.py --broker-list kafka-service:9092
