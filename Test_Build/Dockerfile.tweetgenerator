@@ -22,11 +22,11 @@ RUN cd gaml; mkdir -p gaml/build;cd gaml/build;cmake .. -DCMAKE_INSTALL_PREFIX=/
 
 ENV PKG_CONFIG_PATH=/gaml/gaml/build
 ### Copying files ###
-COPY /Tweet_collection/Tweet_Generator/news-index.csv ./news-index.csv
-COPY /Tweet_collection/Tweet_Generator/news-data.csv ./news-data.csv 
-COPY /Tweet_collection/Tweet_Generator/params.config ./params.config
-COPY /Tweet_collection/Tweet_Generator/Tweet_Generator/tweetoscopeGenerator.hpp ./tweetoscopeGenerator.hpp
-COPY /Tweet_collection/Tweet_Generator/tweet-generator.cpp ./tweet-generator.cpp
+COPY ./Tweet_collection/Tweet_Generator/news-index.csv ./news-index.csv
+COPY ./Tweet_collection/Tweet_Generator/news-data.csv ./news-data.csv 
+COPY ./Tweet_collection/Tweet_Generator/params.config ./params.config
+COPY ./Tweet_collection/Tweet_Generator/Tweet_Generator/tweetoscopeGenerator.hpp ./tweetoscopeGenerator.hpp
+COPY ./Tweet_collection/Tweet_Generator/tweet-generator.cpp ./tweet-generator.cpp
 
 ### Running command ###
 RUN g++ -o tweet-generator -O3 -Wall -std=c++17 tweet-generator.cpp `pkg-config --libs --cflags gaml cppkafka` -lpthread
