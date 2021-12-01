@@ -39,7 +39,7 @@ collector_build :
         - docker:dind
     script:
         - cd Test_Build
-        - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.collector .
+        - docker build -t $CI_REGISTRY_IMAGE/collector -f Dockerfile.tweetcollector ../
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker push $CI_REGISTRY_IMAGE/collector
     only:
