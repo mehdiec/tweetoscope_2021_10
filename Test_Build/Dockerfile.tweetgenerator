@@ -22,7 +22,7 @@ RUN cd gaml; mkdir -p gaml/build;cd gaml/build;cmake .. -DCMAKE_INSTALL_PREFIX=/
 
 ENV PKG_CONFIG_PATH=/gaml/gaml/build
 ### Copying files ###
-ADD ./Tweet_collection/Tweet_Generator/news-index.csv .
+COPY ./Tweet_collection/Tweet_Generator/news-index.csv .
 ADD ./Tweet_collection/Tweet_Generator/news-data.csv . 
 ADD ./Tweet_collection/Tweet_Generator/params.config .
 ADD ./Tweet_collection/Tweet_Generator/tweetoscopeGenerator.hpp .
