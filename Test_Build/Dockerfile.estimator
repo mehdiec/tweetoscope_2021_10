@@ -12,10 +12,10 @@ kafka-python \
 termcolor
 
 ### Adding files ###
-WORKDIR Pipeline_ai
-ADD estimator.py .
-ADD Hawks_processes /Hawks_processes
-ADD logger.py .
+
+COPY /Pipeline_ai/estimator.py .
+COPY Pipeline_ai/Hawks_processes .
+COPY Pipeline_ai/logger.py .
 
 ### Running command ###
 CMD python3 estimator.py --broker-list kafka-service:9092
