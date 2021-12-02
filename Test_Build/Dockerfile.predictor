@@ -5,6 +5,7 @@ RUN pip install --upgrade pip
 RUN pip install numpy \
 scipy \
 matplotlib \
+scikit-learn as sklearn \
 pandas \
 seaborn \
 kafka-python \
