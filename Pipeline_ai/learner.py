@@ -1,10 +1,11 @@
-# External Import
-import argparse  # To parse command line arguments
-import json  # To parse and dump JSON
+import argparse
+import json
+import pickle
+
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producder
 from sklearn.ensemble import RandomForestRegressor
-import pickle
+
 import logger
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
@@ -36,16 +37,14 @@ dict_obs_features_target = {
     "600": {"features": [], "targets": []},
     "1200": {"features": [], "targets": []},
 }
-time2train = [i for i in range(1, 21)]
 
-# Reading samples topic.
+
 for msg in consumer_samples:
 
-    # Getting the data from msg
     T_obs = msg.key
-
     features = dict_obs_features_target[T_obs]["features"]
     targets = dict_obs_features_target[T_obs]["targets"]
+
     msg = msg.value
     features.append(msg["X"])
     w = msg["W"]
@@ -55,6 +54,7 @@ for msg in consumer_samples:
     regr = RandomForestRegressor()  # We compute a new forest.
     model = regr.fit(features, targets)
     logger.info("New model for T_obs =" + str(T_obs))
+
     producer_models.send("cascade_model", key=T_obs, value=model)
 
 producer_models.flush()
