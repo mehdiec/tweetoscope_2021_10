@@ -100,23 +100,20 @@ spec:
           image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/learner
           imagePullPolicy: Always
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: logger-deployment
+  name: logger-pod
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: logger
-  template:
-    metadata:
-      name: logger-pod
-      labels:
-        app: logger
-    spec:
-      containers:
-        - name: logger-container
-          image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/logger
-          imagePullPolicy: Always
-         
+  volumes:
+  - name: twettoscope-vol
+    hostPath:
+      path: /tmp/twettoscopeVol
+      type: DirectoryOrCreate
+  containers:
+  - name: logger-container
+    image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/logger
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: twettoscope-vol
+      mountPath: /tmp
