@@ -2,7 +2,7 @@ import argparse  # To parse command line arguments
 import json  # To parse and dump JSON
 import numpy as np
 import pickle
-import scikit-learn as sklearn
+import sklearn
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producer
 from sklearn.ensemble import RandomForestRegressor
