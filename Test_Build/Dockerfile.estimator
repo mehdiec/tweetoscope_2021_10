@@ -14,7 +14,7 @@ termcolor
 ### Adding files ###
 
 COPY /Pipeline_ai/estimator.py .
-COPY Pipeline_ai/Hawks_processes .
+COPY Pipeline_ai/Hawks_processes ./Hawks_processes
 COPY Pipeline_ai/logger.py .
 
 ### Running command ###

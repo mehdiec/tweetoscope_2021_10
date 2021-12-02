@@ -10,6 +10,6 @@ termcolor
 ### Adding files ###
 ADD ./Pipeline_ai/Hawks_processes Hawks_processes
 ADD ./Pipeline_ai/learner.py .
-
+ADD Pipeline_ai/logger.py .
 ### Running command ###
 CMD python3 learner.py --broker-list kafka-service:9092

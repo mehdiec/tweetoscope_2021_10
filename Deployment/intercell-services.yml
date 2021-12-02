@@ -1,0 +1,107 @@
+ 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tweetgenerator-deployment
+  namespace: cpusdi1-45-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tweetgenerator
+  template:
+    metadata:
+      name: tweetgenerator-pod
+      labels:
+        app: tweetgenerator
+    spec:
+      containers:
+      - name: tweetgenerator-container
+        image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/generator
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tweetcollector-deployment
+  namespace: cpusdi1-45-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tweetcollector
+  template:
+    metadata:
+      name: tweetcollector-pod
+      labels:
+        app: tweetcollector
+    spec:
+      containers:
+      - name: tweetcollector-container
+        image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/collector
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: estimator-deployment
+  namespace: cpusdi1-45-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: estimator
+  template:
+    metadata:
+      name: estimator-pod
+      labels:
+        app: estimator
+    spec:
+      containers:
+        - name: estimator-container
+          image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/estimator
+          imagePullPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predictor-deployment
+  namespace: cpusdi1-45-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: predictor
+  template:
+    metadata:
+      name: predictor-pod
+      labels:
+        app: predictor
+    spec:
+      containers:
+        - name: predictor-container
+          image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/predictor
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learner-deployment
+  namespace: cpusdi1-45-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learner
+  template:
+    metadata:
+      name: learner-pod
+      labels:
+        app: learner
+    spec:
+      containers:
+        - name: learner-container
+          image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/learner
+          imagePullPolicy: Always
+
