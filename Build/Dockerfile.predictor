@@ -1,12 +1,22 @@
 FROM python:3.8-slim
 
+### Libraries Installation ###
 RUN pip install --upgrade pip
-RUN pip3 install numpy \
+RUN pip install numpy \
+scipy \
+scikit-learn \
+matplotlib \
+pandas \
+seaborn \
 kafka-python \
 termcolor
 
-ADD ./tweetoscope/Hawks_processes Hawks_processes
-ADD ./tweetoscope_2021_10/predictor.py .
 
-CMD python3 predictor.py --broker-list localhost:9092
+### Adding files ###
+ADD ./Pipeline_ai/Hawks_processes Hawks_processes
+ADD ./Pipeline_ai/predictor.py .
+ADD Pipeline_ai/logger.py .
+
+### Running command ###
+CMD python3 predictor.py --broker-list kafka-service:9092
 

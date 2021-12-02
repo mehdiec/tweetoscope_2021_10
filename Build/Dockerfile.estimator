@@ -1,7 +1,9 @@
 FROM python:3.8-slim
 
+### Librairies installations ###
+
 RUN pip install --upgrade pip
-RUN pip3 install numpy \
+RUN pip install numpy \
 scipy \
 matplotlib \
 pandas \
@@ -9,14 +11,12 @@ seaborn \
 kafka-python \
 termcolor
 
+### Adding files ###
 
-ADD ./tweetoscope/estimator.py .
-ADD ./tweetoscope/Hawks_processes Hawks_processes
+COPY /Pipeline_ai/estimator.py .
+COPY Pipeline_ai/Hawks_processes ./Hawks_processes
+COPY Pipeline_ai/logger.py .
 
-# ADD ./Hawks_processes/Models/estimation.py .
-# ADD ./Hawks_processes/Models/estimation.py .
-# ADD ./Hawks_processes/utils.py .
-# ADD ./Hawks_processes/Models/predict.py .
-
-CMD python3 estimator.py --broker-list localhost:9092
+### Running command ###
+CMD python3 estimator.py --broker-list kafka-service:9092
 
