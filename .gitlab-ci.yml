@@ -13,6 +13,9 @@ kafka_build :
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker build -t $CI_REGISTRY_IMAGE/kafka -f Dockerfile.kafka  .
         - docker push $CI_REGISTRY_IMAGE/kafka
+    only:
+        changes:
+            - Test_Build/Dockerfile.kafka
 
 generator_build :
     stage: build_image
@@ -28,6 +31,7 @@ generator_build :
         - docker push $CI_REGISTRY_IMAGE/generator
     only:
         changes:
+            - Test_Build/Dockerfile.tweetgenerator
             - Tweet_collection/Tweet_Generator/*
 
 
@@ -44,6 +48,7 @@ collector_build :
         - docker push $CI_REGISTRY_IMAGE/collector
     only:
         changes :
+          - Test_Build/Dockerfile.tweetcollector
           - Tweet_collection/Tweet_Collector/*
 
 
@@ -60,6 +65,7 @@ estimator_build :
         - docker push $CI_REGISTRY_IMAGE/estimator
     only:
         changes :
+          - Test_Build/Dockerfile.estimator
           - Pipeline_ai/Hawks_processes/*
           - Pipeline_ai/estimator.py
 
@@ -78,6 +84,7 @@ predictor_build :
         - docker push $CI_REGISTRY_IMAGE/predictor
     only:
         changes :
+          - Test_Build/Dockerfile.predictor
           - Pipeline_ai/Hawks_processes/*
           - Pipeline_ai/predictor.py
 
@@ -95,6 +102,7 @@ learner_build :
         - docker push $CI_REGISTRY_IMAGE/learner
     only:
         changes:
+          - Test_Build/Dockerfile.learner
           - Pipeline_ai/Hawks_processes/*
           - Pipeline_ai/learner.py
     
@@ -112,5 +120,6 @@ logger_build :
         - docker push $CI_REGISTRY_IMAGE/logger
     only:
         changes:
+          - Test_Build/Dockerfile.logger
           - Pipeline_ai/logger.py
 
