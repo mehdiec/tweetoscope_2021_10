@@ -7,7 +7,7 @@ from termcolor import colored
 
 from kafka import KafkaProducer, KafkaConsumer
 
-default_broker_list = "localhost:9091,localhost:9092"
+default_broker_list = "kafka-service:9092"
 default_log_topic = "logs"
 
 class KafkaHandler(logging.Handler):
