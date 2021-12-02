@@ -1,5 +1,8 @@
 FROM ubuntu
+
+### Libraries Installation ###
 RUN apt-get update
+RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y build-essential pkg-config
 RUN apt-get install -y cmake 
 RUN apt-get install -y libboost-all-dev 
@@ -11,22 +14,22 @@ RUN apt-get install libpthread-stubs0-dev
 RUN apt-get install libssl-dev -y
 
 
+### cppkafka Installation ###
 RUN git clone https://github.com/mfontanini/cppkafka
 RUN cd cppkafka;mkdir build;cd build;cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64;make -j;make install;cd ../..
 
+### Gaml Installation ###
 RUN git clone https://github.com/HerveFrezza-Buet/gaml
 RUN cd gaml; mkdir -p gaml/build;cd gaml/build;cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64;make -j;make install;cd ../../..
 ENV PKG_CONFIG_PATH=/gaml/gaml/build
 
-ADD ./tweetoscope_2021_10/Tweet_collection/Tweet_Collector ./Tweet_Collector
-ADD ./tweetoscope/collector.ini .
+### Adding files ###
+ADD /Tweet_collection/Tweet_Collector ./Tweet_Collector
+ADD /Tweet_collection/Tweet_Collector/collector.ini .
+
+### Running command ###
 RUN g++ -o tweet-collector Tweet_Collector/tweet_collector.cpp -O3 $(pkg-config --cflags --libs gaml) -lpthread -lcppkafka
-
 CMD ./tweet-collector collector.ini
-
-
-#RUN g++ -o tweet_collector -O3 -Wall -std=c++17 tweet_collector.cpp
-
 
 
 
