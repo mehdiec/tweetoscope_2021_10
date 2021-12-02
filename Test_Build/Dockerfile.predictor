@@ -2,10 +2,15 @@ FROM python:3.8-slim
 
 ### Libraries Installation ###
 RUN pip install --upgrade pip
-RUN pip3 install numpy \
+RUN pip install numpy \
+scipy \
 scikit-learn \
+matplotlib \
+pandas \
+seaborn \
 kafka-python \
 termcolor
+
 
 ### Adding files ###
 ADD ./Pipeline_ai/Hawks_processes Hawks_processes
