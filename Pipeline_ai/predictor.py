@@ -4,7 +4,7 @@ import numpy as np
 from kafka import KafkaConsumer  # Import Kafka consumer
 from kafka import KafkaProducer  # Import Kafka producer
 from sklearn.ensemble import RandomForestRegressor
-from util import deserializer
+from utils.util import deserializer
 from utils.predictor_utils import Predictor
 import logger
 
