@@ -5,12 +5,11 @@ RUN pip install --upgrade pip
 RUN pip install numpy \
 scipy \
 matplotlib \
-scikit-learn as sklearn \
 pandas \
 seaborn \
 kafka-python \
 termcolor
-
+RUN pip install scikit-learn as sklearn 
 
 ### Adding files ###
 ADD ./Pipeline_ai/Hawks_processes Hawks_processes
