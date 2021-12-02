@@ -111,25 +111,3 @@ def draw_cumul_intensity(params, history, Tmax=None, label=""):
     cumul = cumul_intensity(I)
     plt.plot(cumul[:, 0] / 60.0, cumul[:, 1], label=label)
     plt.xlabel("Time (min)")
-
-
-def plot_predictions(estimator, params, cascade, alpha, mu):
-    # Compute the predictions according to the estimator
-    est_preds, est_LLs, est_params = predictions_from_estimator(
-        estimator, cascade, alpha, mu
-    )
-
-    # Compute the predictions according to the true parameters
-    preds = predictions(params, cascade, alpha, mu)
-
-    # Compute the counting process
-    N = counting_process(cascade)
-
-    plt.plot(est_preds[:, 0] / 60, est_preds[:, 1], label="est")
-    plt.plot(preds[:, 0] / 60, preds[:, 1], label="pred")
-    plt.plot(N[:, 0] / 60, N[:, 1], label="N")
-    plt.plot(cascade[:, 0] / 60, np.zeros(len(cascade)), "o", color="red")
-    plt.ylim([0, N[-1, 1] * 3])
-    plt.legend()
-
-    return est_preds, est_LLs, est_params
