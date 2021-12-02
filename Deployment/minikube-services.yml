@@ -24,7 +24,7 @@ kind: Deployment
 metadata:
   name: tweetcollector-deployment
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tweetcollector
@@ -99,4 +99,24 @@ spec:
         - name: learner-container
           image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/learner
           imagePullPolicy: Always
-          
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logger-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logger
+  template:
+    metadata:
+      name: logger-pod
+      labels:
+        app: logger
+    spec:
+      containers:
+        - name: logger-container
+          image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/logger
+          imagePullPolicy: Always
+         
