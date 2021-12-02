@@ -100,14 +100,3 @@ spec:
           image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/learner
           imagePullPolicy: Always
           
-apiVersion: v1
-kind: Pod
-metadata:
-  name: logger-pod
-spec:
-  tty : 
-  containers:
-  - name: logger-container
-    image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/logger
-    imagePullPolicy: Always
-    tty : true
