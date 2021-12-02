@@ -4,12 +4,13 @@ FROM python:3.8-slim
 RUN pip install --upgrade pip
 RUN pip install numpy \
 scipy \
+scikit-learn \
 matplotlib \
 pandas \
 seaborn \
 kafka-python \
 termcolor
-RUN pip install scikit-learn as sklearn 
+
 
 ### Adding files ###
 ADD ./Pipeline_ai/Hawks_processes Hawks_processes
