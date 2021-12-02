@@ -1,5 +1,5 @@
 import pickle
-import sklearn
+import json
 
 
 def deserializer(
