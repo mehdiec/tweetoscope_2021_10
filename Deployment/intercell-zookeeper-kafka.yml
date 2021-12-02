@@ -61,7 +61,7 @@ spec:
     - name: KAFKA_ZOOKEEPER_CONNECT
       value: "$(HOST_IP):32010"
     - name: KAFKA_CREATE_TOPICS
-      value: "tweets:1:1,cascade_series:1:1,cascade_properties:3:1,samples:3:1,models:1:1,alerts:1:1,stats:1:1,logs1:1"
+      value: "tweets:4:1,cascade_series:1:1,cascade_properties:3:1,samples:3:1,models:1:1,alerts:1:1,stats:1:1,logs1:1"
     - name: POD_IP
       valueFrom:
         fieldRef:
