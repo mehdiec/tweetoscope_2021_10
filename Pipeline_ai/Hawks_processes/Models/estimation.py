@@ -35,6 +35,17 @@ class MAP(HawksProcess):
         display=False,
         max_n_star=1,
     ):
+        """[summary]
+
+        Args:
+            history ([numpy array]): [(n,2) numpy array containing marked time points (t_i,m_i)]
+            t ([int]): [current time (i.e end of observation window)]
+            display (bool, optional): [display calculation]. Defaults to False.
+            max_n_star (int, optional): [max value of n star]. Defaults to 1.
+
+        Returns:
+            [tuple]: [tuple of the value of the loglikelyhood and the parameters estimated]
+        """
 
         # Compute prior moments
         mu_p, mu_beta, sig_p, sig_beta, corr = self.submodel_params["prior_params"]
@@ -120,6 +131,17 @@ class MLE(HawksProcess):
         display=False,
         max_n_star=1,
     ):
+        """[summary]
+
+        Args:
+            history ([numpy array]): [(n,2) numpy array containing marked time points (t_i,m_i)]
+            t ([int]): [current time (i.e end of observation window)]
+            display (bool, optional): [display calculation]. Defaults to False.
+            max_n_star (int, optional): [max value of n star]. Defaults to 1.
+
+        Returns:
+            [tuple]: [tuple of the value of the loglikelyhood and the parameters estimated]
+        """
 
         # Define the target function to minimize as minus the loglikelihood
         target = lambda params: -loglikelihood(params, history, t)

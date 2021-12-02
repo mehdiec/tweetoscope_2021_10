@@ -1,6 +1,7 @@
 #include "tweetoscopeCollectorParams.hpp"
 #include <cppkafka/cppkafka.h>
 #include "tweet.hpp"
+#include "tweetProcessing.hpp"
 #include <boost/heap/binomial_heap.hpp>
 #include <map>
 #include <queue>
@@ -57,7 +58,6 @@ int main(int argc, char *argv[])
     using cascade_ref = std::shared_ptr<tweetoscope::cascade::Cascade>;
     using cascade_wck = std::weak_ptr<tweetoscope::cascade::Cascade>;
     std::map<tweetoscope::timestamp, std::queue<cascade_wck>> partial_cascade_map;
-    // Assert msg is not empty and there no errors
     bool keep = true;
     std::cout << "Loop" << std::endl;
     std::cout << "-------------------------------" << std::endl
@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
     while (keep)
     {
         auto msg = consumer.poll();
+        // check if the msg is not empty and there no errors
         if (msg && !msg.get_error())
         {
             // Instanciation of a tweet
@@ -76,18 +77,18 @@ int main(int argc, char *argv[])
 
             //  Creating processor of the source if not already created
             auto key = std::to_string(init_key);
-
+            // assert if their is no processor for this tweet
             if (map_idf_processor.find(twt.source) == map_idf_processor.end())
             {
                 tweetoscope::cascade::Processor processor(twt);
-
                 map_idf_processor.insert(std::make_pair(twt.source, processor));
             }
-
+            // get the share pointer coresponding to the tweet or the retweet source
             tweetoscope::cascade::Processor *processor = &map_idf_processor.at(twt.source);
             if (twt.type == "tweet")
             {
 
+                // updating the source time of the processor
                 processor->update_newest_source_time(twt);
                 cascade_ref ref_cascade = tweetoscope::cascade::Cascade::make_cascade_ref(twt, key);
                 cascade_wck wck_cascade = ref_cascade;
@@ -113,22 +114,14 @@ int main(int argc, char *argv[])
                     processor->update_newest_source_time(twt);
                     if (map_key_location[key].node_ != 0)
                     {
-                        processor->decrease_priority(map_key_location[key], ref_cascade);
+                        //processor->decrease_priority(map_key_location[key], ref_cascade);
                     }
                     else
                     {
                         processor->symbol_table.erase(key);
+                        map_key_location.erase(key);
                     }
                 }
-                else
-                {
-                    map_key_location.erase(key);
-                    processor->symbol_table.erase(key); // if expired, remove from symbol_table
-                }
-                //if (wck_cascade.use_count() > 1)
-                //{
-                //    throw std::invalid_argument("too many shared pointers ");
-                //}
             }
             // series
 
@@ -140,13 +133,13 @@ int main(int argc, char *argv[])
                 {
                     std::cout << "Sending Partial Cascades : " << serie << std::endl;
                     PartialMessageBuilder.payload(serie);
-
+                    //sending the message
                     producer.produce(PartialMessageBuilder);
                 }
             }
 
             //// properties
-            //
+
             if (propertiesToSend.size() != 0)
             {
 
