@@ -24,7 +24,7 @@ kind: Deployment
 metadata:
   name: tweetcollector-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: tweetcollector
