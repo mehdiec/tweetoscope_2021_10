@@ -99,3 +99,4 @@ spec:
         - name: learner-container
           image: gitlab-student.centralesupelec.fr:4567/2018ech-choum/tweetoscope_2021_10/learner
           imagePullPolicy: Always
+
