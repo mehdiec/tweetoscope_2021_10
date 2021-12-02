@@ -86,6 +86,7 @@ predictor_build :
         changes :
           - Build/Dockerfile.predictor
           - Pipeline_ai/Hawks_processes/*
+          - Pipeline_ai/utils/*
           - Pipeline_ai/predictor.py
 
 
