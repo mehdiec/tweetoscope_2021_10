@@ -28,24 +28,28 @@ def calculate_w_true(n_obs, n_tot, n_star, G1, estimator):
     return w_true
 
 
+def get_model(msg, dict_model={"300": None, "600": None, "1200": None}):
+
+    T_obs = msg.key
+    if msg.topic == "cascade_model":
+        logger.debug("Received a model!")
+        logger.debug("model for observation " + msg.key)
+        model = msg.value
+        dict_model[T_obs] = model
+
+
 def get_values(
     msg,
     topic_model="cascade_model",
     w_true=None,
     cid_params_dict={},
     cid_n_tot_dict={},
-    dict_model={"300": None, "600": None, "1200": None},
 ):
+
     msg_value = msg.value
     T_obs = msg.key
     cid = None
-    if msg.topic == topic_model:
-        logger.debug("Received a model!")
-        logger.debug("model for observation " + msg.key)
-        model = msg.value
-        dict_model[msg.key] = model
-
-    else:
+    if msg.topic != topic_model:
         if msg_value["type"] == "parameters":
 
             # { 'type': 'parameters', 'cid': 'tw23981', 'msg' : 'blah blah', 'n_obs': 32, 'n_supp' : 120, 'params': [ 0.0423, 124.312 ], n_star G1 }
@@ -55,10 +59,10 @@ def get_values(
             cid = msg_value["cid"]
             n_star = msg_value["n_star"]
             G1 = msg_value["G1"]
+            cid_params_dict[(cid, T_obs)] = msg_value
 
-            if (cid, T_obs) not in cid_n_tot_dict.keys():
-                cid_params_dict[(cid, T_obs)] = msg_value
-            else:
+            if (cid, T_obs) in cid_n_tot_dict.keys():
+
                 n_tot = cid_n_tot_dict[(cid, T_obs)]
                 estimator = HawksProcess(
                     alpha=alpha, mu=mu, n_star=n_star, params=params, G1=G1
@@ -70,11 +74,8 @@ def get_values(
             # { 'type' : 'size', 'cid': 'tw23981', 'n_tot': 127, 't_end': 4329 }
             cid = msg_value["cid"]
             n_tot = msg_value["n_tot"]
-
-            if (cid, T_obs) not in cid_params_dict.keys():
-                cid_n_tot_dict[(cid, T_obs)] = n_tot
-
-            else:
+            cid_n_tot_dict[(cid, T_obs)] = n_tot
+            if (cid, T_obs) in cid_params_dict.keys():
 
                 msg_params = cid_params_dict[(cid, T_obs)]
                 n_star = msg_params["n_star"]
@@ -85,12 +86,14 @@ def get_values(
                     alpha=alpha, mu=mu, n_star=n_star, params=params, G1=G1
                 )
                 w_true = calculate_w_true(n_obs, n_tot, n_star, G1, estimator)
+        if cid:
+            return [w_true, cid, T_obs]
+        else:
+            return []
 
-        return w_true, cid, T_obs
 
-
-def get_params(cid_params_dict, cid, T_obs):
-    params, G1, n_star, n_obs = None, None, None, None
+def get_params(cid_params_dict, cid_n_tot_dict, cid, T_obs):
+    params, G1, n_star, n_obs, n_tot = None, None, None, None, None
 
     if (cid, T_obs) in cid_params_dict.keys():
         msg_params = cid_params_dict[(cid, T_obs)]
@@ -98,8 +101,10 @@ def get_params(cid_params_dict, cid, T_obs):
         G1 = msg_params["G1"]
         params = msg_params["params"]
         n_obs = msg_params["n_obs"]
+    if (cid, T_obs) in cid_n_tot_dict.keys():
+        n_tot = cid_n_tot_dict[(cid, T_obs)]
 
-    return params, G1, n_star, n_obs
+    return params, G1, n_star, n_obs, n_tot
 
 
 def deserializer(
@@ -136,11 +141,14 @@ dict_model = {"300": None, "600": None, "1200": None}
 model = None
 n_tot = None
 n_star = None
-
-
+cid = None
+samples = []
+w_true_old = np.inf
 for msg in consumer:
 
-    w_true, cid, T_obs, n_obs = get_values(
+    get_model(msg, dict_model)
+
+    values = get_values(
         msg,
         topic_model="cascade_model",
         w_true=None,
@@ -148,18 +156,27 @@ for msg in consumer:
         cid_n_tot_dict=cid_n_tot_dict,
     )
 
-    params, G1, n_star = get_params(cid_params_dict, cid, T_obs)
-    if w_true:
-        key = T_obs
-        value_sample = {
-            "type": "sample",
-            "cid": cid,
-            "X": [params[1], G1, n_star],
-            "W": w_true,
-        }
-        producer.send("cascade_samples", key=T_obs, value=value_sample)
-    else:
-        continue
+    if values:
+        w_true, cid, T_obs = values
+    if cid:
+        params, G1, n_star, n_obs, n_tot = get_params(
+            cid_params_dict, cid_n_tot_dict, cid, T_obs
+        )
+
+        if w_true and w_true != w_true_old:
+            w_true_old = w_true
+
+            value_sample = {
+                "type": "sample",
+                "cid": cid,
+                "X": [params[1], G1, n_star],
+                "W": w_true,
+            }
+            if value_sample not in samples:
+                samples.append(value_sample)
+
+            if len(samples) % 5 == 0:
+                producer.send("cascade_samples", key=T_obs, value=value_sample)
 
     if n_star is not None:
         estimator = HawksProcess(
@@ -199,7 +216,7 @@ for msg in consumer:
             stat_value = {
                 "type": "stat",
                 "cid": cid,
-                "T_obs": key,
+                "T_obs": T_obs,
                 "ARE": are,
             }
             logger.info(
@@ -210,7 +227,8 @@ for msg in consumer:
             logger.info("==============================================")
 
             producer.send("cascade_stat", key=T_obs, value=stat_value)
-            n_tot = None
+
+            cid_n_tot_dict.pop((cid, T_obs), None)
 
 
 producer.flush()

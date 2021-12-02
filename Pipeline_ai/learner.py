@@ -38,7 +38,7 @@ dict_obs_features_target = {
     "1200": {"features": [], "targets": []},
 }
 
-
+old_number_target = {"300": 0, "600": 0, "1200": 0}
 for msg in consumer_samples:
 
     T_obs = msg.key
@@ -46,15 +46,18 @@ for msg in consumer_samples:
     targets = dict_obs_features_target[T_obs]["targets"]
 
     msg = msg.value
-    features.append(msg["X"])
-    w = msg["W"]
-    targets.append(w)
 
-    logger.debug("learner do be learning number of samples:" + str(len(features)))
-    regr = RandomForestRegressor()  # We compute a new forest.
-    model = regr.fit(features, targets)
-    logger.info("New model for T_obs =" + str(T_obs))
+    if msg["X"] not in features:
+        features.append(msg["X"])
+        w = msg["W"]
+        targets.append(w)
+    if len(targets) % 5 == 0 and old_number_target[T_obs] != len(targets):
+        old_number_target[T_obs] = len(targets)
+        logger.debug("learner do be learning number of samples:" + str(len(features)))
+        regr = RandomForestRegressor()  # We compute a new forest.
+        model = regr.fit(features, targets)
+        logger.info("New model for T_obs =" + str(T_obs))
 
-    producer_models.send("cascade_model", key=T_obs, value=model)
+        producer_models.send("cascade_model", key=T_obs, value=model)
 
 producer_models.flush()
