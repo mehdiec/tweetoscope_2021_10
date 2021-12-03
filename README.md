@@ -103,6 +103,12 @@ Those are the steps to run the software.
     minikube start
     kubectl apply -f Deployment/minikube-zookeeper-kafka.yml
     kubectl apply -f Deployment/minikube-services.yml
+    kubectl get pods
+    
+    We can see after the container creation of all servvices that all pods are running.
+
+    kubectl logs <pod name> 
+    This will show the output of the pod with the logger
     ```
    
 3. To run the deployment on a cluster (Intercell)
@@ -113,6 +119,12 @@ Those are the steps to run the software.
     cd tweetoscope_2021_10 
     kubectl -n cpusdi1-45-ns apply -f /Deployment/intercell-zookeeper-kafka.yml
     kubectl -n cpusdi1-45-ns apply -f /Deployment/intercell-services.yml
+    kubectl -n cpusdi1-45-ns get pods
+
+    After the container creation time, all pods will be running on the cluster.
+
+    kubectl -n cpusdi1-45-ns logs <pod name> 
+    This will show the output of the pod with the logger
     ```
 
 4. Fault tolerance test (With Intercell) - Supposing you run part.3
@@ -120,7 +132,10 @@ Those are the steps to run the software.
     kubectl -n cpusdi1-45-ns delete pod <pod_name>
     kubectl -n cpusdi1-45-ns get pods -o wide
     ```
-    We will observe that the pod will be recreated automatically in a different node
+    We will observe that the deleted pod will be recreated automatically in a different node.
+
+    kubectl -n cpusdi1-45-ns logs <pod_name>
+    We can check that the deleted pod is running correctly
 
 5. Scaling test (with minikube) - Supposing that part.2 is running)
     ```sh 
@@ -128,9 +143,14 @@ Those are the steps to run the software.
     kubectl scale --replicas=<Nb_replicas> deployment/<nameservice_deployment>
     kubectl get deployments
     kubectl get pods
+
+    We can see that the replicas are working with the scale command. 
+
+    kubectl logs <pod name> 
+    You will see that the replicas are working if there are multiples partitions for the topics 
+    For exemple : tweets as 4 partitions in our deployment zookeeper-kafka file
+
     ```
-
-
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
