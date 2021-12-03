@@ -108,6 +108,7 @@ Those are the steps to run the software.
     We can see after the container creation of all servvices that all pods are running.
 
     kubectl logs <pod name> 
+
     This will show the output of the pod with the logger
     ```
    
@@ -123,7 +124,8 @@ Those are the steps to run the software.
 
     After the container creation time, all pods will be running on the cluster.
 
-    kubectl -n cpusdi1-45-ns logs <pod name> 
+    kubectl -n cpusdi1-45-ns logs <pod name>
+
     This will show the output of the pod with the logger
     ```
 
@@ -135,6 +137,7 @@ Those are the steps to run the software.
     We will observe that the deleted pod will be recreated automatically in a different node.
 
     kubectl -n cpusdi1-45-ns logs <pod_name>
+
     We can check that the deleted pod is running correctly
 
 5. Scaling test (with minikube) - Supposing that part.2 is running)
@@ -147,6 +150,7 @@ Those are the steps to run the software.
     We can see that the replicas are working with the scale command. 
 
     kubectl logs <pod name> 
+    
     You will see that the replicas are working if there are multiples partitions for the topics 
     For exemple : tweets as 4 partitions in our deployment zookeeper-kafka file
 
