@@ -133,13 +133,13 @@ Those are the steps to run the software.
     ```sh
     kubectl -n cpusdi1-45-ns delete pod <pod_name>
     kubectl -n cpusdi1-45-ns get pods -o wide
-    ```
+    
     We will observe that the deleted pod will be recreated automatically in a different node.
 
     kubectl -n cpusdi1-45-ns logs <pod_name>
 
     We can check that the deleted pod is running correctly
-
+    ```
 5. Scaling test (with minikube) - Supposing that part.2 is running)
     ```sh 
     kubectl get deployments
