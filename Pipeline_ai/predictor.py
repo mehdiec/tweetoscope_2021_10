@@ -8,7 +8,7 @@ from utils.util import deserializer
 from utils.predictor_utils import Predictor
 import logger
 
-#test video
+#test 2 video
 from Hawks_processes.Models.predict import HawksProcess
 
 alpha, mu = 2.4, 10
