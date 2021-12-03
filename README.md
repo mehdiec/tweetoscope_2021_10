@@ -4,8 +4,8 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://gitlab-student.centralesupelec.fr/2018ech-choum/tweetoscope_2021_10">
+    <img src="https://img.gothru.org/283/9820106392942001866/overlay/assets/20210430082511.Ma26Qm.png?save=optimize" alt="Logo" width="90" height="50">
   </a>
 
 
@@ -24,8 +24,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The project consists in estimating the virality of a tweet from its original message. By means of a tweet generator. We built a tweet collector in C++ that retrieves the tweet stream and sends it to the estimator under a formalism by the topic cascade_serie. An estimator using the Hawkes process simulates the tweet cascade that will be directly sent to the predictor. The predictor then estimates the virality of the tweet. Finally, a learner is implemented to continuously improve the accuracy of our model so that the prediction is better
+The project consists in estimating the virality of a tweet from its original message. By means of a tweet generator. We built a tweet collector in C++ that retrieves the tweet stream and sends it to the estimator under a formalism by the topic cascade_serie. An estimator using the Hawkes process simulates the tweet cascade that will be directly sent to the predictor. The predictor then estimates the virality of the tweet. Finally, a learner is implemented to continuously improve the accuracy of our model so that the prediction is better.
 
+<img src="https://pennerath.pages.centralesupelec.fr/tweetoscope/graphviz-images/ead74cb4077631acad74606a761525fe2a3228c1.svg" alt=image_archi/>
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -78,48 +79,63 @@ To get a local copy up and running follow these simple steps.
 
 To run the software you need to install the following.
 * docker
-  ```sh
+  sh
   npm install npm@latest -g
-  ```
+  
 
 * minikube
-  ```sh
+  sh
   npm install npm@latest -g
-  ```
+  
 
 ### Installation
 
-_Those are the steps to run the software._
+Those are the steps to run the software.
 
 1. Download the Deployment directory on your local machin
    ```sh
+   git clone https://gitlab-student.centralesupelec.fr/2018ech-choum/tweetoscope_2021_10.git
+   cd tweetoscope_2021_10
+   ```
    
-   ```
-2. Start minikube and run the zookeeper and kafka services
-   ```sh
+2. To run the deployment on minikube
+    ```sh
     minikube start
+    kubectl apply -f Deployment/minikube-zookeeper-kafka.yml
+    kubectl apply -f Deployment/minikube-services.yml
+    ```
+   
+3. To run the deployment on a cluster (Intercell)
+    ```sh
+    ssh cpusdi1_45@phome.metz.supelec.fr
+    ssh ic57
+    git clone https://gitlab-student.centralesupelec.fr/2018ech-choum/tweetoscope_2021_10.git
+    cd tweetoscope_2021_10 
+    kubectl -n cpusdi1-45-ns apply -f /Deployment/intercell-zookeeper-kafka.yml
+    kubectl -n cpusdi1-45-ns apply -f /Deployment/intercell-services.yml
+    ```
 
-    kubectl apply -f zookeeper-and-kafka.yml
-   ```
-3. To run the softwqre
-   ```sh
-   npm install
-   ```
+4. Fault tolerance test (With Intercell) - Supposing you run part.3
+    ```sh
+    kubectl -n cpusdi1-45-ns delete pod <pod_name>
+    kubectl -n cpusdi1-45-ns get pods -o wide
+    ```
+    We will observe that the pod will be recreated automatically in a different node
+
+5. Scaling test (with minikube) - Supposing that part.2 is running)
+    ```sh 
+    kubectl get deployments
+    kubectl scale --replicas=4 deployment/<tweet_collector_deployment>
+    kubectl get pods
+    ```
+
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
-
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-
 
 
 
