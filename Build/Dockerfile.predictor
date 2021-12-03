@@ -14,6 +14,7 @@ termcolor
 
 ### Adding files ###
 ADD ./Pipeline_ai/Hawks_processes Hawks_processes
+ADD ./Pipeline_ai/utils utils
 ADD ./Pipeline_ai/predictor.py .
 ADD Pipeline_ai/logger.py .
 
