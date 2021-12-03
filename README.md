@@ -125,7 +125,8 @@ Those are the steps to run the software.
 5. Scaling test (with minikube) - Supposing that part.2 is running)
     ```sh 
     kubectl get deployments
-    kubectl scale --replicas=4 deployment/<tweet_collector_deployment>
+    kubectl scale --replicas=<Nb_replicas> deployment/<nameservice_deployment>
+    kubectl get deployments
     kubectl get pods
     ```
 
