@@ -24,7 +24,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-
+The project consists in estimating the virality of a tweet from its original message. By means of a tweet generator. We built a tweet collector in C++ that retrieves the tweet stream and sends it to the estimator under a formalism by the topic cascade_serie. An estimator using the Hawkes process simulates the tweet cascade that will be directly sent to the predictor. The predictor then estimates the virality of the tweet. Finally, a learner is implemented to continuously improve the accuracy of our model so that the prediction is better
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -54,6 +54,20 @@ To get a local copy up and running follow these simple steps.
 
 <!-- ROADMAP -->
 ## Folder layout
+
+
+    .
+    ├── Build                   # Docker files (alternatively `dist`)
+    ├── Deployment              # YAML files used for minikube
+    ├── Pipeline_ai             # Folder containing files for the estimator, learner and predictor
+    │   ├── Hawks_Processes     # files used for Hawks process
+    │   └── utils               # Usefull functions
+    ├── Tweet_collection        # Folder containing tweet generation and tweet collection files
+    │   ├── Tweet_Collector     # tweet collection
+    │   └── Tweet_Generator     # tweet generation
+    ├── .gitlab-ci.yml
+    └── README.md
+
 
 
 
