@@ -36,9 +36,9 @@ The project consists in estimating the virality of a tweet from its original mes
 
 This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 
-* [APACHE KAFKA](https://kafka.apache.org/) 
-* [Docker](https://maven.apache.org/) 
-* [Kubernetes](https://kubernetes.io/) 
+* [APACHE KAFKA](https://kafka.apache.org/)
+* [Docker](https://maven.apache.org/)
+* [Kubernetes](https://kubernetes.io/)
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -86,7 +86,7 @@ To run the software you need to install the following.
 
 Those are the steps to run the software.
 
-1. Download the Deployment directory on your local machin
+1. Download the Deployment directory on your local machine
    ```sh
    git clone https://gitlab-student.centralesupelec.fr/2018ech-choum/tweetoscope_2021_10.git
    cd tweetoscope_2021_10
@@ -101,7 +101,7 @@ Those are the steps to run the software.
     ```
     We can see after the container creation of all servvices that all pods are running.
     ```sh
-    kubectl logs <pod name> 
+    kubectl logs <pod name>
     ```
 
     This will show the output of the pod with the logger
@@ -111,7 +111,7 @@ Those are the steps to run the software.
     ssh cpusdi1_45@phome.metz.supelec.fr
     ssh ic57
     git clone https://gitlab-student.centralesupelec.fr/2018ech-choum/tweetoscope_2021_10.git
-    cd tweetoscope_2021_10 
+    cd tweetoscope_2021_10
     kubectl -n cpusdi1-45-ns apply -f /Deployment/intercell-zookeeper-kafka.yml
     kubectl -n cpusdi1-45-ns apply -f /Deployment/intercell-services.yml
     kubectl -n cpusdi1-45-ns get pods
@@ -123,7 +123,7 @@ Those are the steps to run the software.
 
     This will show the output of the pod with the logger
 
-4. Fault tolerance test (With Intercell) - Supposing you run part.3
+4. Fault tolerance test (With Intercell) - Supposing part.3 in russing
     ```sh
     kubectl -n cpusdi1-45-ns delete pod <pod_name>
     kubectl -n cpusdi1-45-ns get pods -o wide
@@ -134,22 +134,22 @@ Those are the steps to run the software.
     ```
 
     We can check that the deleted pod is running correctly
-5. Scaling test (with minikube) - Supposing that part.2 is running)
-    ```sh 
+5. Scaling test (with minikube) - Supposing that part.2 is running
+    ```sh
     kubectl get deployments
     kubectl scale --replicas=<Nb_replicas> deployment/<nameservice_deployment>
     kubectl get deployments
     kubectl get pods
     ```
-    We can see that the replicas are working with the scale command. 
-    ```sh 
-    kubectl logs <pod name> 
+    We can see that the replicas are working with the scale command.
+    ```sh
+    kubectl logs <pod name>
     ```
     You will see that the replicas are working if there are multiples partitions for the topics.
 
     For exemple : tweets as 4 partitions in our deployment zookeeper-kafka file
 
-    
+   
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -168,6 +168,11 @@ Those are the steps to run the software.
 * **Mehdi Ech-Chouini**
 * **Hamza Islah**
 
+<!-- CONTACT -->
+## Authors
+
+* [Report](Documentation/rapport_Tweetoscope.pdf)
+* [Video](https://youtu.be/kv7GyNePImc)
 
 
 <!-- ACKNOWLEDGMENTS -->
@@ -179,6 +184,3 @@ Those are the libraries the project was build with.
 * [kafka-python](https://kafka-python.readthedocs.io/en/master/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
