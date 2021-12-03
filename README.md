@@ -123,7 +123,7 @@ Those are the steps to run the software.
 
     This will show the output of the pod with the logger
 
-4. Fault tolerance test (With Intercell) - Supposing you run part.3
+4. Fault tolerance test (With Intercell) - Supposing part.3 in russing
     ```sh
     kubectl -n cpusdi1-45-ns delete pod <pod_name>
     kubectl -n cpusdi1-45-ns get pods -o wide
@@ -134,7 +134,7 @@ Those are the steps to run the software.
     ```
 
     We can check that the deleted pod is running correctly
-5. Scaling test (with minikube) - Supposing that part.2 is running)
+5. Scaling test (with minikube) - Supposing that part.2 is running
     ```sh 
     kubectl get deployments
     kubectl scale --replicas=<Nb_replicas> deployment/<nameservice_deployment>
