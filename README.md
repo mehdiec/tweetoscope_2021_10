@@ -86,7 +86,7 @@ To run the software you need to install the following.
 
 Those are the steps to run the software.
 
-1. Download the Deployment directory on your local machin
+1. Download the Deployment directory on your local machine
    ```sh
    git clone https://gitlab-student.centralesupelec.fr/2018ech-choum/tweetoscope_2021_10.git
    cd tweetoscope_2021_10
