@@ -6,12 +6,12 @@ default_cascade_directory = "./cache/cascades"
 
 
 def write_cascade(cascade, casc_index, cascade_directory=default_cascade_directory):
-    """
-    Save a cascade into a csv file
+    """Save a cascade into a csv file
 
-    cascade           -- (n,2) numpy array containing marked time points (t_i,m_i)
-    casc_index        -- index of the cascade (int)
-    cascade_directory -- directory where the file is saved
+    Args:
+        cascade (numpy array): (n,2) numpy array containing marked time points (t_i,m_i)
+        casc_index (int): index of the cascade (int)
+        cascade_directory (str, optional): directory where the file is saved. Defaults to default_cascade_directory.
     """
 
     if not os.path.exists(cascade_directory):
@@ -24,11 +24,14 @@ def write_cascade(cascade, casc_index, cascade_directory=default_cascade_directo
 
 
 def read_cascade(casc_index, cascade_directory=default_cascade_directory):
-    """
-    Reads a cascade csv file and returns its cascade as a numpy array containing marked time points (t_i,m_i)
+    """Reads a cascade csv file and returns its cascade as a numpy array containing marked time points (t_i,m_i)
 
-    casc_index        -- index of the cascade (int)
-    cascade_directory -- directory where the file is saved
+    Args:
+        casc_index (int): index of the cascade (int)
+        cascade_directory (str, optional): _description_. directory where the file is saved
+
+    Returns:
+        numpy array: numpy array containing marked time points
     """
 
     df = pd.read_csv(

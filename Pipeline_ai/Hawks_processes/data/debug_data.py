@@ -6,13 +6,17 @@ from Hawks_processes.data.cascades import write_cascade
 
 
 def neg_power_law(alpha, mu, size=1):
-    """
-    Returns a 1D-array of samples drawn from a negative power law distribution
+    """Returns a 1D-array of samples drawn from a negative power law distribution
 
-    alpha -- power parameter of the power-law mark distribution
-    mu    -- min value parameter of the power-law mark distribution
-    size  -- number of samples
+    Args:
+        alpha (float): power parameter of the power-law mark distribution
+        mu (float): min value parameter of the power-law mark distribution
+        size (int, optional): number of samples. Defaults to 1.
+
+    Returns:
+        array: 1D-array of samples
     """
+
     u = np.random.uniform(size=size)
     X = mu * np.exp(np.log(u) / (1.0 - alpha))
     if size == 1:
@@ -22,6 +26,8 @@ def neg_power_law(alpha, mu, size=1):
 
 
 class SimulateProcess:
+    """Class that generate cascade"""
+
     def __init__(
         self,
         params,
@@ -29,20 +35,27 @@ class SimulateProcess:
         alpha,
         mu,
     ):
+        """
+
+        Args:
+            params (tuple): parameter tuple (p,beta) of the generating process
+            m0 (float): magnitude of the initial tweet at t = 0.
+            alpha (float): power parameter of the power-law mark distribution
+            mu (flaot): min value parameter of the power-law mark distribution
+        """
         self.params = params
         self.m0 = m0  # number of folower
         self.alpha = alpha
         self.mu = mu
 
     def simulate_marked_exp_hawkes_process(self, max_size=10000):
-        """
-        Returns a 2D-array whose rows contain marked time points simulated from an exponential Hawkes process
+        """Returns a 2D-array whose rows contain marked time points simulated from an exponential Hawkes process
 
-        params   -- parameter tuple (p,beta) of the generating process
-        m0       -- magnitude of the initial tweet at t = 0.
-        alpha    -- power parameter of the power-law mark distribution
-        mu       -- min value parameter of the power-law mark distribution
-        max_size -- maximal authorized size of the cascade
+        Args:
+            max_size (int, optional): maximal authorized size of the cascade. Defaults to 10000.
+
+        Returns:
+            array: 2D-array whose rows contain marked time points
         """
 
         p, beta = self.params
@@ -86,21 +99,18 @@ class SimulateProcess:
         return T
 
     def generate_pseudo_data(self, n, prior_params):
-        """
-        Sample cascades from some parameter prior and save them on disk.
+        """Sample cascades from some parameter prior and save them on disk.
 
-        n            -- number of cascades to generate
-        prior_params -- list (mu_p, mu_beta, sig_p, sig_beta, corr) of hyper parameters of the prior
-        m0           -- magnitude of the initial tweet at t = 0.
-        alpha        -- power parameter of the power-law mark distribution
-        mu           -- min value parameter of the power-law mark distribution
+        Args:
+            n (int): number of cascades to generate
+            prior_params (list): list (mu_p, mu_beta, sig_p, sig_beta, corr) of hyper parameters of the prior
         """
 
         # Generate parameters from prior
         mu_p, mu_beta, sig_p, sig_beta, corr = prior_params
         mu_params = [mu_p, mu_beta]
         cov_p_beta = corr * sig_p * sig_beta
-        Q = np.array([[sig_p ** 2, cov_p_beta], [cov_p_beta, sig_beta ** 2]])
+        Q = np.array([[sig_p**2, cov_p_beta], [cov_p_beta, sig_beta**2]])
         params = multivariate_log_normal(mu_params, Q, size=n)
         # Then generate cascades
         for i, (p, beta) in enumerate(params):

@@ -35,11 +35,11 @@ class MAP(HawksProcess):
         display=False,
         max_n_star=1,
     ):
-        """[summary]
+        """Compute the loglikelyhood and the estimated parameters from a cascade history
 
         Args:
-            history ([numpy array]): [(n,2) numpy array containing marked time points (t_i,m_i)]
-            t ([int]): [current time (i.e end of observation window)]
+            history (numpy array): [(n,2) numpy array containing marked time points (t_i,m_i)]
+            t (int): [current time (i.e end of observation window)]
             display (bool, optional): [display calculation]. Defaults to False.
             max_n_star (int, optional): [max value of n star]. Defaults to 1.
 
@@ -51,7 +51,7 @@ class MAP(HawksProcess):
         mu_p, mu_beta, sig_p, sig_beta, corr = self.submodel_params["prior_params"]
         sample_mean = np.array([mu_p, mu_beta])
         cov_p_beta = corr * sig_p * sig_beta
-        Q = np.array([[sig_p ** 2, cov_p_beta], [cov_p_beta, sig_beta ** 2]])
+        Q = np.array([[sig_p**2, cov_p_beta], [cov_p_beta, sig_beta**2]])
 
         # Apply method of moments
         cov_prior = np.log(
@@ -99,21 +99,24 @@ class MAP(HawksProcess):
 
 
 class MLE(HawksProcess):
-    """[summary]
-
-    Args:
-        HawksProcess ([type]): [description]
-    """
-
     def __init__(
         self,
         alpha=None,
         mu=None,
-        params=None,
         submodel_params=None,
         n_star=None,
         G1=None,
     ):
+        """_summary_
+
+        Args:
+            alpha (_type_, optional): _description_. Defaults to None.
+            mu (_type_, optional): _description_. Defaults to None.
+            submodel_params (_type_, optional): _description_. Defaults to None.
+            n_star (_type_, optional): _description_. Defaults to None.
+            G1 (_type_, optional): _description_. Defaults to None.
+
+        """
         super(MLE, self).__init__(
             alpha=alpha,
             mu=mu,
@@ -134,13 +137,13 @@ class MLE(HawksProcess):
         """[summary]
 
         Args:
-            history ([numpy array]): [(n,2) numpy array containing marked time points (t_i,m_i)]
-            t ([int]): [current time (i.e end of observation window)]
-            display (bool, optional): [display calculation]. Defaults to False.
-            max_n_star (int, optional): [max value of n star]. Defaults to 1.
+            history ([numpy array]): (n,2) numpy array containing marked time points (t_i,m_i)
+            t ([int]): current time (i.e end of observation window)
+            display (bool, optional): display calculation. Defaults to False.
+            max_n_star (int, optional): max value of n star. Defaults to 1.
 
         Returns:
-            [tuple]: [tuple of the value of the loglikelyhood and the parameters estimated]
+            tuple: tuple of the value of the loglikelyhood and the parameters estimated
         """
 
         # Define the target function to minimize as minus the loglikelihood

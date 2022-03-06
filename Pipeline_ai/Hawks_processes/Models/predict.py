@@ -23,6 +23,17 @@ class HawksProcess:
         submodel_params=None,
         estimator=None,
     ):
+        """_summary_
+
+        Args:
+            alpha (float): power parameter of the power-law mark distribution
+            mu (float): min value parameter of the power-law mark distribution
+            n_star (_type_, optional): _description_. Defaults to None.
+            G1 (_type_, optional): _description_. Defaults to None.
+            params (tuple, optional): parameter tuple (p,beta) of the Hawkes process. Defaults to None.
+            submodel_params (dict, optional): different parameters for models. Defaults to None.
+            estimator (str, optional): name of the estimator. Defaults to None.
+        """
         if submodel_params is None:
             submodel_params = {
                 "init_params": np.array([0.0001, 1.0 / 60]),
@@ -54,15 +65,18 @@ class HawksProcess:
         raise NotImplementedError
 
     def prediction(self, history, t, model=None):
-        """
-        Returns the expected total numbers of points for a set of time points
+        """Returns the expected total numbers of points for a set of time points
 
-        params   -- parameter tuple (p,beta) of the Hawkes process
-        history  -- (n,2) numpy array containing marked time points (t_i,m_i)
-        alpha    -- power parameter of the power-law mark distribution
-        mu       -- min value parameter of the power-law mark distribution
-        t        -- current time (i.e end of observation window)
-        model    -- random forest model
+        Args:
+            history (array): (n,2) numpy array containing marked time points (t_i,m_i)
+            t (int): current time (i.e end of observation window)
+            model (_type_, optional): random forest model. Defaults to None.
+
+        Raises:
+            Exception: unusal value for n_star
+
+        Returns:
+            int: total numbers of points
         """
 
         p, beta = self.params
@@ -86,12 +100,17 @@ class HawksProcess:
         return Ntot
 
     def prediction_one_shot(self, n, model=None):
-        """
-        Returns the expected total numbers of points for a set of time points
+        """Returns the expected total numbers of points for a set of time points
 
-        params   -- parameter tuple (p,beta) of the Hawkes process
-        n        -- observation size
-        model    -- random forest model
+        Args:
+            n (int): observation size
+            model (_type_, optional): random forest model. Defaults to None.
+
+        Raises:
+             Exception: unusal value for n_star
+
+        Returns:
+            int: total numbers of points
         """
 
         p, beta = self.params
