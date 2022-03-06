@@ -1,20 +1,17 @@
-import os
 import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-from scipy import stats
 
 
 def loglikelihood(params, history, t):
-    """
-    Returns the loglikelihood of a Hawkes process with exponential kernel
+    """Returns the loglikelihood of a Hawkes process with exponential kernel
     computed with a linear time complexity
 
-    params   -- parameter tuple (p,beta) of the Hawkes process
-    history  -- (n,2) numpy array containing marked time points (t_i,m_i)
-    t        -- current time (i.e end of observation window)
+    Args:
+        params (tuple): parameter tuple (p,beta) of the Hawkes process
+        history (array): (n,2) numpy array containing marked time points (t_i,m_i)
+        t (float): current time (i.e end of observation window)
+
+    Returns:
+        float: loglikelihood
     """
 
     p, beta = params
@@ -23,7 +20,6 @@ def loglikelihood(params, history, t):
         return -np.inf
 
     n = len(history)
-    tis = history[:, 0]
     mis = history[:, 1]
 
     LL = (n - 1) * np.log(p * beta)
@@ -47,12 +43,15 @@ def loglikelihood(params, history, t):
 
 
 def multivariate_log_normal(mu, cov, size=1):
-    """
-    Returns a (size,2)-array containing iid samples of (p,beta) drawn from a given prior distribution
+    """Returns a (size,2)-array containing iid samples of (p,beta) drawn from a given prior distribution
 
-    mu   -- mean vector of size 2
-    cov  -- covariance matrix of size 2
-    size -- number of samples
+    Args:
+        mu (array): mean vector of size 2
+        cov (array): covariance matrix of size 2
+        size (int, optional): number of samples. Defaults to 1.
+
+    Returns:
+        array: (size,2)-array containing iid samples of (p,beta)
     """
 
     mu, cov = np.asarray(mu), np.asarray(cov)

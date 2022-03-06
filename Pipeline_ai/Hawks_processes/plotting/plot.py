@@ -1,11 +1,5 @@
-import os
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-from scipy import stats
-from tqdm.notebook import tqdm
 from scipy import integrate
 
 coef_Tmax = 1.1
@@ -21,11 +15,14 @@ def plot_cascade(cascade, Tmax=None):
 
 
 def counting_process(cascade, T=None):
-    """
-    Returns a 2D-array N such that N(:,0) contains time samples t and N(:,1) contains images by point process N(t)
+    """Returns a 2D-array N such that N(:,0) contains time samples t and N(:,1) contains images by point process N(t)
 
-    cascade -- 2D-array containing samples of the point process as returned by simulate_exp_hawkes_process
-    T       -- 1D array containing time samples whose value N(t) has to be computed (if None defines T to cover the full cascade)
+    Args:
+        cascade (array): 2D-array containing samples of the point process as returned by simulate_exp_hawkes_process
+        T (array, optional): 1D array containing time samples whose value N(t) has to be computed (if None defines T to cover the full cascade). Defaults to None.
+
+    Returns:
+        array: 2D-array N such that N(:,0) contains time samples t and N(:,1) contains images by point process N(t)
     """
 
     tks = cascade[:, 0]
@@ -40,13 +37,16 @@ def counting_process(cascade, T=None):
 
 
 def cond_intensity(params, history, T):
-    """
-    Returns a numpy 2D-array containing the conditional intensity of an exponential Hawkes process
+    """Returns a numpy 2D-array containing the conditional intensity of an exponential Hawkes process
     (first column is time, second is mapped intensity)
 
-    params   -- parameter tuple (p,beta) of the Hawkes process
-    history  -- (n,2) numpy array containing marked time points (t_i,m_i)
-    T        -- 1D-array containing the input times for which the intensity must be computed
+    Args:
+        params (tuple): parameter tuple (p,beta) of the Hawkes process
+        history (array): (n,2) numpy array containing marked time points (t_i,m_i)
+        T (array): 1D-array containing the input times for which the intensity must be computed
+
+    Returns:
+        array: conditional intensity of an exponential Hawkes process
     """
 
     p, beta = params
@@ -66,13 +66,13 @@ def cond_intensity(params, history, T):
 
 
 def draw_intensity(params, history, Tmax=None, label=""):
-    """
-    Draws an intensity plot along the history
+    """Draws an intensity plot along the history
 
-    params   -- parameter tuple (p,beta) of the Hawkes process
-    history  -- (n,2) numpy array containing marked time points (t_i,m_i)
-    Tmax     -- upper bound of the plot interval
-    label    -- legend label
+    Args:
+        params (tuple): parameter tuple (p,beta) of the Hawkes process
+        history (array): (n,2) numpy array containing marked time points (t_i,m_i)
+        Tmax (int, optional): upper bound of the plot interval. Defaults to None.
+        label (str, optional): legend label. Defaults to "".
     """
 
     if Tmax is None:
@@ -86,11 +86,14 @@ def draw_intensity(params, history, Tmax=None, label=""):
 
 
 def cumul_intensity(cond_intensity):
-    """
-    Returns a 2D array containing the cumulative intensity such that first column is time
+    """Returns a 2D array containing the cumulative intensity such that first column is time
     and second is mapped cumulative intensity up to given time.
 
-    cond_intensity -- 2D-array as returned by cond_intensity function
+    Args:
+        cond_intensity (array): 2D-array as returned by cond_intensity function
+
+    Returns:
+        array: 2D array containing the cumulative intensity
     """
 
     T = cond_intensity[:, 0]
