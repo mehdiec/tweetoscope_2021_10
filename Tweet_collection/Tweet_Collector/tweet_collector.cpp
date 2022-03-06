@@ -1,7 +1,7 @@
 #include "tweetoscopeCollectorParams.hpp"
 #include <cppkafka/cppkafka.h>
 #include "tweet.hpp"
-#include "tweetProcessing.hpp"
+#include "tweetProcessing.cpp"
 #include <boost/heap/binomial_heap.hpp>
 #include <map>
 #include <queue>
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
                     processor->update_newest_source_time(twt);
                     if (map_key_location[key].node_ != 0)
                     {
-                        //processor->decrease_priority(map_key_location[key], ref_cascade);
+                        // processor->decrease_priority(map_key_location[key], ref_cascade);
                     }
                     else
                     {
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
                 {
                     std::cout << "Sending Partial Cascades : " << serie << std::endl;
                     PartialMessageBuilder.payload(serie);
-                    //sending the message
+                    // sending the message
                     producer.produce(PartialMessageBuilder);
                 }
             }
